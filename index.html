@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=5.0, user-scalable=yes">
+    <meta name="description" content="Application de gestion financière responsive pour SAS">
+    <meta name="theme-color" content="#3b82f6"><title>Gestion Financière SAS - Demo BETA</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="responsive.css">    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <script>
+        // Vérifier le chargement des librairies
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('📊 Chart.js disponible:', typeof Chart !== 'undefined');
+            console.log('📈 XLSX disponible:', typeof XLSX !== 'undefined');
+            
+            if (typeof XLSX === 'undefined') {
+                console.warn('⚠️ XLSX non chargé, les exports Excel ne fonctionneront pas');
+            }
+            if (typeof Chart === 'undefined') {
+                console.warn('⚠️ Chart.js non chargé, les graphiques ne fonctionneront pas');
+            }
+        });
+    </script>
+    <style>
+        /* Styles pour les nouvelles fonctionnalités */
+        .btn-purple {
+            background-color: #8b5cf6;
+            color: white;
+        }
+        
+        .btn-purple:hover {
+            background-color: #7c3aed;
+        }
+        
+        .action-btn {
+            margin: 0 2px;
+            padding: 4px 8px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .btn-small {
+            min-width: auto;
+            padding: 4px 8px;
+        }
+        
+        .btn-info {
+            background-color: #3b82f6;
+            color: white;
+        }
+        
+        .btn-warning {
+            background-color: #f59e0b;
+            color: white;
+        }
+        
+        .btn-danger {
+            background-color: #ef4444;
+            color: white;
+        }
+        
+        .actions {
+            text-align: center;
+            white-space: nowrap;
+        }
+        
+        .alert {
+            padding: 12px 16px;
+            margin: 8px 0;
+            border-radius: 6px;
+            border-left: 4px solid;
+        }
+        
+        .alert-warning {
+            background-color: #fef3c7;
+            border-left-color: #f59e0b;
+            color: #92400e;
+        }
+        
+        .alert-danger {
+            background-color: #fee2e2;
+            border-left-color: #ef4444;
+            color: #991b1b;
+        }
+        
+        .alert-info {
+            background-color: #dbeafe;
+            border-left-color: #3b82f6;
+            color: #1e40af;
+        }
+        
+        #alertsContainer {
+            margin: 20px 0;
+        }
+        
+        .keyboard-shortcuts {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            display: none;
+        }
+        
+        .keyboard-shortcuts.show {
+            display: block;
+        }
+        
+        /* Mode sombre */
+        .dark-theme {
+            background-color: #1a1a1a;
+            color: #e4e4e7;
+        }
+        
+        .dark-theme .container {
+            background-color: #2d2d2d;
+        }
+        
+        .dark-theme .financial-table {
+            background-color: #374151;
+            color: #e4e4e7;
+        }
+        
+        .dark-theme .financial-table th {
+            background-color: #4b5563;
+        }
+        
+        .dark-theme .settings-panel {
+            background-color: #2d2d2d;
+            color: #e4e4e7;
+        }
+          .header-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+        
+        .year-controls {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+        
+        .action-controls {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .export-controls {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+          #importFile {
+            display: none;
+        }
+        
+        /* ===== RESPONSIVE DESIGN ===== */
+        
+        /* Mobile First - Par défaut pour mobile */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+                margin: 0;
+            }
+            
+            .app-header h1 {
+                font-size: 18px;
+                text-align: center;
+                margin-bottom: 15px;
+            }
+            
+            .header-controls {
+                flex-direction: column;
+                gap: 15px;
+                align-items: stretch;
+            }
+            
+            .year-controls, .action-controls, .export-controls {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            
+            .year-controls {
+                order: 1;
+            }
+            
+            .action-controls {
+                order: 2;
+            }
+            
+            .export-controls {
+                order: 3;
+            }
+            
+            .btn {
+                font-size: 12px;
+                padding: 8px 12px;
+                min-width: auto;
+            }
+            
+            /* Table responsive */
+            .table-container {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            .financial-table {
+                min-width: 800px;
+                font-size: 12px;
+            }
+            
+            .financial-table th,
+            .financial-table td {
+                padding: 6px 4px;
+                white-space: nowrap;
+            }
+            
+            .financial-table input {
+                width: 80px;
+                font-size: 12px;
+                padding: 4px;
+            }
+            
+            .action-btn {
+                padding: 2px 4px;
+                font-size: 10px;
+                margin: 0 1px;
+            }
+            
+            /* Charts responsive */
+            .charts-container {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .chart-item {
+                height: 250px;
+            }
+            
+            /* Settings panel mobile */
+            .settings-panel {
+                padding: 15px;
+            }
+            
+            .settings-content {
+                width: 95%;
+                max-height: 85vh;
+            }
+            
+            .settings-header h2 {
+                font-size: 18px;
+            }
+            
+            .setting-group {
+                margin-bottom: 15px;
+            }
+            
+            .setting-group label {
+                font-size: 14px;
+                display: block;
+                margin-bottom: 5px;
+            }
+            
+            .setting-group input {
+                width: 100%;
+                font-size: 14px;
+                padding: 8px;
+            }
+            
+            /* Keyboard shortcuts mobile */
+            .keyboard-shortcuts {
+                bottom: 10px;
+                right: 10px;
+                left: 10px;
+                font-size: 11px;
+                padding: 8px;
+            }
+            
+            /* Alerts mobile */
+            .alert {
+                font-size: 13px;
+                padding: 10px;
+                margin: 5px 0;
+            }
+            
+            /* Footer mobile */
+            footer {
+                padding: 15px 10px !important;
+                font-size: 11px !important;
+            }
+        }
+        
+        /* Tablette Portrait (768px - 1024px) */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .header-controls {
+                gap: 15px;
+            }
+            
+            .action-controls {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .financial-table {
+                font-size: 13px;
+            }
+            
+            .financial-table input {
+                width: 90px;
+            }
+            
+            .charts-container {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .chart-item {
+                height: 300px;
+            }
+            
+            .settings-content {
+                width: 80%;
+            }
+        }
+        
+        /* Desktop (1025px et plus) */
+        @media (min-width: 1025px) {
+            .container {
+                max-width: 1400px;
+                margin: 0 auto;
+                padding: 30px;
+            }
+            
+            .charts-container {
+                grid-template-columns: 1fr 1fr;
+                gap: 30px;
+            }
+            
+            .chart-item {
+                height: 350px;
+            }
+        }
+        
+        /* Large Desktop (1440px et plus) */
+        @media (min-width: 1440px) {
+            .container {
+                max-width: 1600px;
+            }
+            
+            .financial-table {
+                font-size: 15px;
+            }
+            
+            .chart-item {
+                height: 400px;
+            }
+        }
+        
+        /* ===== RESPONSIVE MODALS ===== */
+        @media (max-width: 768px) {
+            .custom-modal .modal-content {
+                width: 95% !important;
+                height: 90vh !important;
+                max-height: 90vh !important;
+                margin: 5vh auto !important;
+            }
+            
+            .modal-header {
+                padding: 15px !important;
+            }
+            
+            .modal-header h2 {
+                font-size: 16px !important;
+            }
+            
+            .modal-body {
+                padding: 15px !important;
+                font-size: 14px;
+            }
+            
+            .modal-footer {
+                padding: 10px 15px !important;
+            }
+            
+            /* Stats module responsive */
+            .stats-container {
+                grid-template-columns: 1fr !important;
+                gap: 10px !important;
+            }
+            
+            .stats-card {
+                padding: 10px !important;
+            }
+            
+            .stats-value {
+                font-size: 18px !important;
+            }
+            
+            /* Comparison module responsive */
+            .comparison-controls {
+                flex-direction: column !important;
+                gap: 10px !important;
+            }
+            
+            .year-selector {
+                width: 100% !important;
+            }
+            
+            /* Forecast module responsive */
+            .predictions-container {
+                grid-template-columns: 1fr !important;
+                gap: 15px !important;
+            }
+            
+            .trend-indicators {
+                grid-template-columns: 1fr !important;
+            }
+            
+            .scenario-content {
+                grid-template-columns: 1fr !important;
+            }
+            
+            /* Budget module responsive */
+            .budget-overview {
+                grid-template-columns: 1fr !important;
+            }
+            
+            .budget-categories {
+                grid-template-columns: 1fr !important;
+            }
+            
+            /* Reports module responsive */
+            .report-grid {
+                grid-template-columns: 1fr !important;
+            }
+            
+            .report-summary {
+                grid-template-columns: 1fr !important;
+            }
+        }
+        
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .custom-modal .modal-content.modal-large {
+                width: 90% !important;
+            }
+            
+            .stats-container {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+            
+            .trend-indicators {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+            
+            .budget-categories {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+        }
+        
+        /* ===== TOUCH OPTIMIZATIONS ===== */
+        @media (pointer: coarse) {
+            .btn {
+                min-height: 44px;
+                padding: 12px 16px;
+            }
+            
+            .action-btn {
+                min-height: 36px;
+                min-width: 36px;
+                padding: 6px 8px;
+            }
+            
+            input[type="number"], input[type="text"], select {
+                min-height: 44px;
+                font-size: 16px; /* Évite le zoom sur iOS */
+            }
+            
+            .close-modal {
+                min-height: 44px;
+                min-width: 44px;
+            }
+        }
+        
+        /* ===== PRINT STYLES ===== */
+        @media print {
+            .header-controls,
+            .settings-panel,
+            .keyboard-shortcuts,
+            .custom-modal,
+            .alert,
+            footer,
+            .action-btn {
+                display: none !important;
+            }
+            
+            .container {
+                width: 100% !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            
+            .financial-table {
+                font-size: 10px;
+                border-collapse: collapse;
+            }
+            
+            .financial-table th,
+            .financial-table td {
+                border: 1px solid #000 !important;
+                padding: 4px !important;
+            }
+            
+            .charts-container {
+                display: none;
+            }
+        }
+        
+        /* ===== ACCESSIBILITY ===== */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #1a1a1a;
+                --text-color: #e4e4e7;
+                --card-bg: #2d2d2d;
+            }
+        }
+        
+        /* ===== HIGH DPI DISPLAYS ===== */
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            .financial-table {
+                font-weight: 400;
+            }
+            
+            .btn {
+                font-weight: 500;
+            }
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Assurer que jsPDF est correctement initialisé et accessible
+            if (window.jsPDF) {
+                console.log('jsPDF est disponible globalement');
+            } else if (window.jspdf) {
+                console.log('jspdf est disponible via window.jspdf');
+            } else {
+                console.warn('Aucune bibliothèque PDF n\'est détectée. L\'exportation PDF pourrait ne pas fonctionner.');
+            }
+
+            // S'assurer que tous les modals sont fermés avant d'en ouvrir un nouveau
+            const closeAllModals = () => {
+                document.querySelectorAll('.custom-modal').forEach(modal => modal.remove());
+            };
+        });
+    </script>    <!-- Scripts de l'application -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <script src="forecast_new.js"></script>
+    <script src="budget_new.js"></script>
+    <script src="reports_new.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header class="app-header">
+            <h1>📊 Gestion Financière SAS - Demo BETA</h1>
+            <div class="header-controls">
+                <div class="year-controls">
+                    <select id="yearSelect" class="year-select"></select>
+                    <button id="addYearBtn" class="btn btn-primary" title="Ajouter une année">➕</button>
+                    <button id="deleteYearBtn" class="btn btn-danger" title="Supprimer l'année">🗑️</button>
+                    <button id="duplicateYearBtn" class="btn btn-secondary" title="Dupliquer l'année">📋</button>
+                </div>
+                
+                <div class="action-controls">
+                    <button id="statsBtn" class="btn btn-info" title="Statistiques">📈 Stats</button>
+                    <button id="compareBtn" class="btn btn-secondary" title="Comparaison">🔍 Comparer</button>
+                    <button id="forecastBtn" class="btn btn-success" title="Prévisions">🔮 Prévisions</button>
+                    <button id="budgetBtn" class="btn btn-info" title="Gestion Budget">💰 Budget</button>
+                    <button id="reportBtn" class="btn btn-warning" title="Rapports détaillés">📋 Rapports</button>
+                </div>                  <div class="export-controls">
+                    <button id="chartTypeBtn" class="btn btn-info" title="Changer type de graphique">📊 Type</button>
+                    <button id="exportChartBtn" class="btn btn-success" title="Exporter graphiques">📈 Export</button>
+                    <button id="importBtn" class="btn btn-warning" title="Importer des données">📥 Import</button>
+                    <button id="exportBtn" class="btn btn-success" title="Exporter vers Excel">📤 Excel</button>
+                    <button id="printBtn" class="btn btn-secondary" title="Imprimer">🖨️ Print</button>
+                    <button id="backupBtn" class="btn btn-info" title="Sauvegarde complète">💾 Backup</button>
+                </div>
+                <button id="settingsBtn" class="btn btn-primary">⚙️ Paramètres</button>
+            </div>
+        </header>
+
+        <!-- Zone d'alertes -->
+        <div id="alertsContainer"></div>
+
+        <main>
+            <!-- Tableau financier -->
+            <div class="table-container">
+                <table class="financial-table">
+                    <thead>
+                        <tr>
+                            <th>Mois</th>
+                            <th>Chiffre d'affaires (€)</th>
+                            <th>Pertes (€)</th>
+                            <th>Achats professionnels (€)</th>
+                            <th>Bénéfice brut (€)</th>
+                            <th>Charges sociales (€)</th>
+                            <th>Bénéfice net (€)</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <!-- Les lignes seront générées dynamiquement -->
+                    </tbody>
+                    <tfoot>
+                        <tr class="totals-row">
+                            <td><strong>TOTAL</strong></td>
+                            <td id="totalRevenue"><strong>0 €</strong></td>
+                            <td id="totalLosses"><strong>0 €</strong></td>
+                            <td id="totalPurchases"><strong>0 €</strong></td>
+                            <td id="totalGrossProfit"><strong>0 €</strong></td>
+                            <td id="totalTaxes"><strong>0 €</strong></td>
+                            <td id="totalNetProfit"><strong>0 €</strong></td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <!-- Graphiques -->
+            <div class="charts-container">
+                <div class="chart-item">
+                    <canvas id="revenueChart"></canvas>
+                </div>
+                <div class="chart-item">
+                    <canvas id="profitChart"></canvas>
+                </div>
+            </div>
+        </main>
+
+        <!-- Panel des paramètres -->
+        <div id="settingsPanel" class="settings-panel hidden">
+            <div class="settings-content">
+                <div class="settings-header">
+                    <h2>⚙️ Paramètres</h2>
+                    <button id="closeSettings" class="btn btn-secondary">✕</button>
+                </div>
+                
+                <div class="settings-body">
+                    <div class="setting-group">
+                        <label for="taxRate">Taux de charges sociales (%):</label>
+                        <input type="number" id="taxRate" min="0" max="100" step="0.1">
+                    </div>
+                    
+                    <div class="setting-group">
+                        <label for="themeColor">Couleur du thème:</label>
+                        <input type="color" id="themeColor">
+                    </div>
+                    
+                    <div class="setting-group">
+                        <label for="alertThreshold">Seuil d'alerte (€):</label>
+                        <input type="number" id="alertThreshold" min="0" step="100">
+                    </div>
+                    
+                    <div class="setting-group">
+                        <label>
+                            <input type="checkbox" id="autoBackup">
+                            Sauvegarde automatique
+                        </label>
+                    </div>
+                    
+                    <div class="setting-group">
+                        <label>
+                            <input type="checkbox" id="darkMode">
+                            Mode sombre
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="settings-footer">
+                    <button id="restoreBackup" class="btn btn-warning">🔄 Restaurer</button>
+                    <button id="saveSettings" class="btn btn-primary">💾 Sauvegarder</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input caché pour l'import de fichiers -->
+        <input type="file" id="importFile" accept=".json,.xlsx">
+
+        <!-- Raccourcis clavier -->
+        <div id="keyboardShortcuts" class="keyboard-shortcuts">
+            <div><strong>Raccourcis clavier :</strong></div>
+            <div>Ctrl+S : Sauvegarder</div>
+            <div>Ctrl+E : Exporter Excel</div>
+            <div>Ctrl+D : Dupliquer année</div>
+            <div>Ctrl+B : Backup JSON</div>
+            <div>Échap : Fermer modals</div>
+            <div>F1 : Aide (ce panneau)</div>
+        </div>    </div>
+    
+    <!-- Footer avec informations -->
+    <footer style="text-align: center; padding: 20px; color: #666; font-size: 12px;">
+        <p>Gestion Financière SAS v2.0 - Données sauvegardées automatiquement</p>
+        <p>Appuyez sur F1 pour voir les raccourcis clavier</p>
+    </footer>      <!-- Scripts -->
+    <script src="script_new_fixed.js"></script>
+    <script src="stats.js"></script>
+    <script src="comparison.js"></script>
+    
+    <script>
+        // Gestion de l'aide (F1)
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'F1') {
+                e.preventDefault();
+                const shortcuts = document.getElementById('keyboardShortcuts');
+                shortcuts.classList.toggle('show');
+                setTimeout(() => {
+                    if (shortcuts.classList.contains('show')) {
+                        shortcuts.classList.remove('show');
+                    }
+                }, 5000);
+            }
+        });
+        
+        // Gestion des nouveaux paramètres
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                if (typeof app !== 'undefined' && app) {
+                    // Connecter les nouveaux boutons
+                    const forecastBtn = document.getElementById('forecastBtn');
+                    const budgetBtn = document.getElementById('budgetBtn');
+                    const reportBtn = document.getElementById('reportBtn');
+                    
+                    if (forecastBtn) {
+                        forecastBtn.addEventListener('click', () => {
+                            if (typeof ForecastModule !== 'undefined') {
+                                ForecastModule.showForecast(app.data, app.currentYear, app.config);
+                            } else {
+                                app.showNotification('Module de prévisions non chargé', 'error');
+                            }
+                        });
+                    }                      if (budgetBtn) {
+                        budgetBtn.addEventListener('click', () => {
+                            console.log('🎯 Clic sur bouton Budget détecté');
+                            if (typeof BudgetModule !== 'undefined') {
+                                BudgetModule.showBudget(app.data, app.currentYear, app.config);
+                            } else {
+                                console.error('❌ Module Budget non chargé');
+                                app.showNotification('Module Budget non disponible', 'error');
+                            }
+                        });
+                    }
+                      if (reportBtn) {
+                        reportBtn.addEventListener('click', () => {
+                            if (typeof ReportsModule !== 'undefined') {
+                                ReportsModule.showReports(app.data, app.currentYear, app.config);
+                            } else {
+                                app.showNotification('Module de rapports non chargé', 'error');
+                            }
+                        });
+                    }
+                    
+                    // Connecter les boutons Stats et Compare
+                    const statsBtn = document.getElementById('statsBtn');
+                    const compareBtn = document.getElementById('compareBtn');
+                    
+                    if (statsBtn) {
+                        statsBtn.addEventListener('click', () => {
+                            if (typeof StatsModule !== 'undefined') {
+                                StatsModule.showStats(app.data, app.currentYear, app.config);
+                            } else {
+                                app.showNotification('Module de statistiques non chargé', 'error');
+                            }
+                        });
+                    }
+                    
+                    if (compareBtn) {
+                        compareBtn.addEventListener('click', () => {
+                            if (typeof ComparisonModule !== 'undefined') {
+                                ComparisonModule.showComparison(app.data, app.config);
+                            } else {
+                                app.showNotification('Module de comparaison non chargé', 'error');
+                            }
+                        });
+                    }
+                    
+                    // Ajouter les nouveaux gestionnaires d'événements
+                    const alertThresholdInput = document.getElementById('alertThreshold');
+                    const autoBackupInput = document.getElementById('autoBackup');
+                    const darkModeInput = document.getElementById('darkMode');
+                    const restoreBackupBtn = document.getElementById('restoreBackup');
+                    
+                    if (alertThresholdInput) {
+                        alertThresholdInput.value = app.config.alertThreshold || 5000;
+                    }
+                    
+                    if (autoBackupInput) {
+                        autoBackupInput.checked = app.config.autoBackup || false;
+                        
+                        // Auto-sauvegarde si activée
+                        if (app.config.autoBackup) {
+                            setInterval(() => {
+                                app.saveToStorage();
+                                console.log('🔄 Sauvegarde automatique effectuée');
+                            }, 60000); // Toutes les minutes
+                        }
+                    }
+                    
+                    if (darkModeInput) {
+                        darkModeInput.checked = app.config.darkMode || false;
+                        
+                        // Appliquer le thème sombre si configuré
+                        if (app.config.darkMode) {
+                            document.body.classList.add('dark-theme');
+                        }
+                        
+                        darkModeInput.addEventListener('change', () => {
+                            app.toggleTheme();
+                        });
+                    }
+                      if (restoreBackupBtn) {
+                        restoreBackupBtn.addEventListener('click', () => {
+                            app.restoreFromBackup();
+                        });
+                    }
+                    
+                    // Méthode pour fermer les modals
+                    app.closeModal = function() {
+                        const modals = document.querySelectorAll('.custom-modal');
+                        modals.forEach(modal => {
+                            if (modal) {
+                                modal.remove();
+                            }
+                        });
+                    };
+                    
+                    // Méthode pour basculer le thème
+                    app.toggleTheme = function() {
+                        const isDark = document.body.classList.toggle('dark-theme');
+                        this.config.darkMode = isDark;
+                        this.saveToStorage();
+                        this.showNotification(`Thème ${isDark ? 'sombre' : 'clair'} activé`, 'info');
+                    };
+                    
+                    // Méthode pour restaurer une sauvegarde
+                    app.restoreFromBackup = function() {
+                        const input = document.createElement('input');
+                        input.type = 'file';
+                        input.accept = '.json';
+                        input.onchange = (e) => {
+                            const file = e.target.files[0];
+                            if (file) {
+                                const reader = new FileReader();
+                                reader.onload = (e) => {
+                                    try {
+                                        const backupData = JSON.parse(e.target.result);
+                                        if (backupData.data && backupData.config) {
+                                            this.data = backupData.data;
+                                            this.config = { ...this.config, ...backupData.config };
+                                            this.generateTable();
+                                            this.saveToStorage();
+                                            this.showNotification('Sauvegarde restaurée avec succès', 'success');
+                                        } else {
+                                            this.showNotification('Format de sauvegarde invalide', 'error');
+                                        }
+                                    } catch (error) {
+                                        this.showNotification('Erreur lors de la restauration', 'error');
+                                        console.error('Erreur restauration:', error);
+                                    }
+                                };
+                                reader.readAsText(file);
+                            }
+                        };
+                        input.click();
+                    };
+                    
+                    // Étendre la fonction saveSettings
+                    const originalSaveSettings = app.saveSettings;
+                    app.saveSettings = function() {
+                        // Sauvegarder les nouveaux paramètres
+                        if (alertThresholdInput) {
+                            this.config.alertThreshold = parseInt(alertThresholdInput.value) || 5000;
+                        }
+                        if (autoBackupInput) {
+                            this.config.autoBackup = autoBackupInput.checked;
+                        }
+                        
+                        // Appeler la fonction originale
+                        if (originalSaveSettings) {
+                            originalSaveSettings.call(this);
+                        } else {
+                            this.saveToStorage();
+                        }
+                        
+                        this.showNotification('Paramètres sauvegardés', 'success');
+                    };
+                    
+                    // Ajouter des raccourcis clavier étendus
+                    document.addEventListener('keydown', (e) => {
+                        if (e.ctrlKey) {
+                            switch(e.key.toLowerCase()) {
+                                case 's':
+                                    e.preventDefault();
+                                    app.saveToStorage();
+                                    app.showNotification('Données sauvegardées', 'success');
+                                    break;
+                                case 'e':
+                                    e.preventDefault();
+                                    app.exportToExcel();
+                                    break;
+                                case 'd':
+                                    e.preventDefault();
+                                    app.duplicateYear();
+                                    break;
+                                case 'b':
+                                    e.preventDefault();
+                                    app.exportToJSON();
+                                    break;                                case 't':
+                                    e.preventDefault();
+                                    app.toggleTheme();
+                                    break;
+                            }
+                        }
+                        
+                        // Fermer les modals avec Échap
+                        if (e.key === 'Escape') {
+                            const modal = document.querySelector('.custom-modal');
+                            if (modal) {
+                                app.closeModal();
+                            }
+                            
+                            const settingsPanel = document.getElementById('settingsPanel');
+                            if (settingsPanel && !settingsPanel.classList.contains('hidden')) {
+                                app.toggleSettings();
+                            }
+                        }
+                    });
+                    
+                    // Vérification de performances au démarrage
+                    setTimeout(() => {
+                        if (app.performanceCheck) {
+                            app.performanceCheck();
+                        }
+                    }, 2000);
+                }
+            }, 1000);
+        });
+        
+        // Extension de l'objet app avec de nouvelles méthodes
+        window.addEventListener('load', () => {
+            if (typeof app !== 'undefined' && app) {
+                // Ajouter la méthode performanceCheck
+                app.performanceCheck = function() {
+                    const issues = [];
+                    
+                    // Vérifier la quantité de données
+                    const totalMonths = Object.keys(this.data).reduce((acc, year) => {
+                        return acc + (this.data[year]?.length || 0);
+                    }, 0);
+                    
+                    if (totalMonths > 120) { // Plus de 10 ans de données
+                        issues.push({
+                            type: 'warning',
+                            message: 'Beaucoup de données stockées. Considérez archiver les anciennes années.'
+                        });
+                    }
+                    
+                    // Vérifier l'utilisation mémoire
+                    if (performance.memory) {
+                        const memoryUsage = performance.memory.usedJSHeapSize / 1048576; // MB
+                        if (memoryUsage > 50) {
+                            issues.push({
+                                type: 'warning',
+                                message: `Utilisation mémoire élevée: ${memoryUsage.toFixed(1)} MB`
+                            });
+                        }
+                    }
+                    
+                    // Vérifier les données incomplètes
+                    const currentYearData = this.data[this.currentYear] || [];
+                    const incompleteMonths = currentYearData.filter(month => 
+                        month.revenue === 0 && month.losses === 0 && month.purchases === 0
+                    ).length;
+                    
+                    if (incompleteMonths > 6) {
+                        issues.push({
+                            type: 'info',
+                            message: `${incompleteMonths} mois sans données cette année. Pensez à les remplir.`
+                        });
+                    }
+                    
+                    // Afficher les problèmes trouvés
+                    if (issues.length > 0) {
+                        console.log('🔍 Vérification de performances:', issues);
+                        
+                        // Afficher une notification pour les problèmes critiques
+                        const criticalIssues = issues.filter(issue => issue.type === 'error');
+                        if (criticalIssues.length > 0) {
+                            this.showNotification('Problèmes de performance détectés', 'warning');
+                        }
+                    }
+                };
+            }
+        });
+    </script>
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // S'assurer que les modals sont fermés avant d'en ouvrir un nouveau
+        const closeAllModals = () => {
+            document.querySelectorAll('.custom-modal').forEach(modal => modal.remove());
+        };
+
+        // Bouton Prévisions
+        document.getElementById('forecastBtn')?.addEventListener('click', () => {
+            closeAllModals();
+            if (typeof ForecastModule !== 'undefined') {
+                ForecastModule.showForecast(app.data, app.currentYear, app.config);
+            } else {
+                console.error('Module Prévisions non chargé');
+            }
+        });
+
+        // Bouton Budget
+        document.getElementById('budgetBtn')?.addEventListener('click', () => {
+            closeAllModals();
+            if (typeof BudgetModule !== 'undefined') {
+                BudgetModule.showBudget(app.data, app.currentYear, app.config);
+            } else {
+                console.error('Module Budget non chargé');
+            }
+        });
+    });
+</script>
+</body>
+</html>

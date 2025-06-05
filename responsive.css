@@ -1,0 +1,707 @@
+/* ===== RESPONSIVE.CSS ===== */
+/* Styles responsive dédiés pour l'application de gestion financière */
+
+/* ===== VARIABLES RESPONSIVE ===== */
+:root {
+    --mobile-padding: 10px;
+    --tablet-padding: 20px;
+    --desktop-padding: 30px;
+    --mobile-font-size: 12px;
+    --tablet-font-size: 14px;
+    --desktop-font-size: 16px;
+}
+
+/* ===== BREAKPOINTS ===== */
+/* Mobile First - Par défaut pour mobile (0-768px) */
+@media (max-width: 768px) {
+    /* Layout principal */
+    .container {
+        padding: var(--mobile-padding);
+        margin: 0;
+        min-width: 320px;
+    }
+    
+    /* En-tête responsive */
+    .app-header h1 {
+        font-size: 18px;
+        text-align: center;
+        margin-bottom: 15px;
+        word-break: break-word;
+    }
+    
+    .header-controls {
+        flex-direction: column;
+        gap: 15px;
+        align-items: stretch;
+    }
+    
+    .year-controls, 
+    .action-controls, 
+    .export-controls {
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    
+    /* Boutons responsive */
+    .btn {
+        font-size: var(--mobile-font-size);
+        padding: 10px 14px;
+        min-width: auto;
+        min-height: 44px; /* Touch-friendly */
+        white-space: nowrap;
+    }
+    
+    .btn-small {
+        padding: 6px 10px;
+        font-size: 11px;
+        min-height: 36px;
+    }
+    
+    /* Table responsive */
+    .table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin: 0 -10px;
+        padding: 0 10px;
+    }
+    
+    .financial-table {
+        min-width: 900px;
+        font-size: 11px;
+    }
+    
+    .financial-table th,
+    .financial-table td {
+        padding: 8px 6px;
+        white-space: nowrap;
+    }
+    
+    .financial-table input {
+        width: 70px;
+        font-size: 12px;
+        padding: 6px;
+        min-height: 32px;
+    }
+    
+    .action-btn {
+        padding: 4px 6px;
+        font-size: 10px;
+        margin: 0 1px;
+        min-height: 28px;
+        min-width: 28px;
+    }
+    
+    /* Graphiques responsive */
+    .charts-container {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .chart-item {
+        height: 250px;
+        margin-bottom: 10px;
+    }
+    
+    /* Modals responsive */
+    .custom-modal .modal-content {
+        width: 95% !important;
+        height: 90vh !important;
+        max-height: 90vh !important;
+        margin: 5vh auto !important;
+        overflow-y: auto;
+    }
+    
+    .modal-header {
+        padding: 12px 15px !important;
+        flex-wrap: wrap;
+    }
+    
+    .modal-header h2 {
+        font-size: 16px !important;
+        margin-right: auto;
+    }
+    
+    .modal-body {
+        padding: 15px !important;
+        font-size: 14px;
+        line-height: 1.4;
+    }
+    
+    .modal-footer {
+        padding: 10px 15px !important;
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .modal-footer .btn {
+        width: 100%;
+        margin: 0;
+    }
+    
+    /* Paramètres responsive */
+    .settings-panel {
+        padding: 10px;
+    }
+    
+    .settings-content {
+        width: 95%;
+        max-height: 85vh;
+        margin: 0 auto;
+    }
+    
+    .settings-header h2 {
+        font-size: 18px;
+    }
+    
+    .setting-group {
+        margin-bottom: 15px;
+    }
+    
+    .setting-group label {
+        font-size: 14px;
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+    }
+    
+    .setting-group input,
+    .setting-group select {
+        width: 100%;
+        font-size: 16px; /* Évite le zoom iOS */
+        padding: 12px;
+        border-radius: 6px;
+        border: 1px solid #d1d5db;
+        min-height: 44px;
+    }
+    
+    /* Notifications responsive */
+    .notification {
+        right: 10px !important;
+        left: 10px !important;
+        top: 10px !important;
+        max-width: none !important;
+        font-size: 14px;
+    }
+    
+    /* Raccourcis clavier responsive */
+    .keyboard-shortcuts {
+        bottom: 10px !important;
+        right: 10px !important;
+        left: 10px !important;
+        font-size: 11px;
+        padding: 8px;
+        text-align: center;
+    }
+    
+    /* Alertes responsive */
+    .alert {
+        font-size: 13px;
+        padding: 10px;
+        margin: 8px 0;
+        border-radius: 6px;
+    }
+    
+    /* Footer responsive */
+    footer {
+        padding: 15px 10px !important;
+        font-size: 11px !important;
+        text-align: center;
+    }
+    
+    /* Formulaires responsive */
+    .year-select {
+        width: 100%;
+        padding: 10px;
+        font-size: 14px;
+        min-height: 44px;
+    }
+    
+    /* Grilles responsive */
+    .stats-container,
+    .comparison-grid,
+    .forecast-grid,
+    .budget-grid,
+    .report-grid {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+    }
+    
+    /* Cards responsive */
+    .stats-card,
+    .comparison-card,
+    .forecast-card,
+    .budget-card,
+    .report-card {
+        padding: 12px !important;
+        margin-bottom: 10px;
+    }
+    
+    /* Text responsive */
+    .stats-value,
+    .comparison-value,
+    .forecast-value {
+        font-size: 18px !important;
+    }
+    
+    /* Navigation par onglets responsive */
+    .stats-tabs,
+    .forecast-tabs,
+    .budget-tabs {
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+    
+    .tab-btn {
+        padding: 8px 10px !important;
+        font-size: 12px !important;
+        flex: 1;
+        min-width: 80px;
+        text-align: center;
+    }
+}
+
+/* ===== TABLETTE PORTRAIT (769px - 1024px) ===== */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .container {
+        padding: var(--tablet-padding);
+        max-width: 100%;
+    }
+    
+    .app-header h1 {
+        font-size: 22px;
+    }
+    
+    .header-controls {
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+    
+    .action-controls {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+    }
+    
+    .btn {
+        font-size: var(--tablet-font-size);
+        padding: 10px 16px;
+    }
+    
+    .financial-table {
+        font-size: 13px;
+    }
+    
+    .financial-table input {
+        width: 90px;
+        font-size: 13px;
+    }
+    
+    .charts-container {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .chart-item {
+        height: 300px;
+    }
+    
+    .settings-content {
+        width: 80%;
+        max-width: 600px;
+    }
+    
+    /* Grilles pour tablette */
+    .stats-container,
+    .comparison-grid,
+    .forecast-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 15px !important;
+    }
+    
+    .budget-grid,
+    .report-grid {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) !important;
+    }
+    
+    /* Modals pour tablette */
+    .custom-modal .modal-content.modal-large {
+        width: 90% !important;
+        max-width: 800px;
+    }
+    
+    .trend-indicators,
+    .budget-categories {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+
+/* ===== DESKTOP (1025px et plus) ===== */
+@media (min-width: 1025px) {
+    .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: var(--desktop-padding);
+    }
+    
+    .app-header h1 {
+        font-size: 28px;
+    }
+    
+    .btn {
+        font-size: var(--desktop-font-size);
+        padding: 12px 20px;
+    }
+    
+    .financial-table {
+        font-size: 15px;
+    }
+    
+    .financial-table input {
+        width: 120px;
+        font-size: 14px;
+    }
+    
+    .charts-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+    }
+    
+    .chart-item {
+        height: 350px;
+    }
+    
+    .settings-content {
+        width: 60%;
+        max-width: 700px;
+    }
+    
+    /* Grilles pour desktop */
+    .stats-container {
+        grid-template-columns: repeat(4, 1fr) !important;
+    }
+    
+    .comparison-grid,
+    .forecast-grid {
+        grid-template-columns: repeat(3, 1fr) !important;
+    }
+    
+    .budget-categories,
+    .report-grid {
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)) !important;
+    }
+}
+
+/* ===== LARGE DESKTOP (1440px et plus) ===== */
+@media (min-width: 1440px) {
+    .container {
+        max-width: 1600px;
+    }
+    
+    .app-header h1 {
+        font-size: 32px;
+    }
+    
+    .financial-table {
+        font-size: 16px;
+    }
+    
+    .financial-table input {
+        width: 140px;
+        font-size: 15px;
+    }
+    
+    .chart-item {
+        height: 400px;
+    }
+    
+    .charts-container {
+        gap: 40px;
+    }
+}
+
+/* ===== OPTIMISATIONS TACTILES ===== */
+@media (pointer: coarse) {
+    .btn {
+        min-height: 44px;
+        padding: 12px 16px;
+        touch-action: manipulation;
+    }
+    
+    .action-btn {
+        min-height: 36px;
+        min-width: 36px;
+        padding: 8px;
+    }
+    
+    input[type="number"], 
+    input[type="text"], 
+    input[type="email"],
+    input[type="password"],
+    select,
+    textarea {
+        min-height: 44px;
+        font-size: 16px; /* Évite le zoom sur iOS */
+        padding: 12px;
+        touch-action: manipulation;
+    }
+    
+    .close-modal,
+    .close-btn {
+        min-height: 44px;
+        min-width: 44px;
+        padding: 10px;
+    }
+    
+    .tab-btn {
+        min-height: 44px;
+        padding: 12px 16px;
+    }
+}
+
+/* ===== IMPRESSION ===== */
+@media print {
+    .header-controls,
+    .settings-panel,
+    .keyboard-shortcuts,
+    .custom-modal,
+    .alert,
+    .notification,
+    footer,
+    .action-btn,
+    .btn {
+        display: none !important;
+    }
+    
+    .container {
+        width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        max-width: none !important;
+    }
+    
+    .app-header h1 {
+        font-size: 18px;
+        margin-bottom: 10px;
+    }
+    
+    .financial-table {
+        font-size: 10px;
+        border-collapse: collapse;
+        width: 100%;
+    }
+    
+    .financial-table th,
+    .financial-table td {
+        border: 1px solid #000 !important;
+        padding: 4px !important;
+    }
+    
+    .financial-table input {
+        border: none;
+        background: transparent;
+        font-weight: bold;
+    }
+    
+    .charts-container {
+        display: none;
+    }
+    
+    .table-container {
+        overflow: visible;
+        margin: 0;
+        padding: 0;
+    }
+    
+    /* Forcer les couleurs pour l'impression */
+    * {
+        color: #000 !important;
+        background: #fff !important;
+    }
+    
+    .totals-row {
+        font-weight: bold !important;
+        background: #f0f0f0 !important;
+    }
+}
+
+/* ===== ACCESSIBILITÉ ===== */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg-color: #1a1a1a;
+        --text-color: #e4e4e7;
+        --card-bg: #2d2d2d;
+        --border-color: #4b5563;
+    }
+}
+
+/* ===== ÉCRANS HAUTE RÉSOLUTION ===== */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .financial-table {
+        font-weight: 400;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+    
+    .btn {
+        font-weight: 500;
+        -webkit-font-smoothing: antialiased;
+    }
+    
+    .app-header h1 {
+        font-weight: 600;
+        -webkit-font-smoothing: antialiased;
+    }
+}
+
+/* ===== MODES D'AFFICHAGE SPÉCIAUX ===== */
+@media (orientation: landscape) and (max-height: 500px) {
+    /* Mode paysage sur mobile */
+    .modal-content {
+        height: 95vh !important;
+        max-height: 95vh !important;
+    }
+    
+    .keyboard-shortcuts {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    /* Très petits écrans */
+    .app-header h1 {
+        font-size: 16px;
+    }
+    
+    .btn {
+        font-size: 11px;
+        padding: 8px 10px;
+    }
+    
+    .financial-table {
+        font-size: 10px;
+    }
+    
+    .chart-item {
+        height: 200px;
+    }
+}
+
+/* ===== FALLBACKS POUR ANCIENS NAVIGATEURS ===== */
+@supports not (display: grid) {
+    .stats-container,
+    .comparison-grid,
+    .forecast-grid,
+    .budget-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+    
+    .stats-card,
+    .comparison-card,
+    .forecast-card,
+    .budget-card {
+        flex: 1;
+        min-width: 250px;
+    }
+}
+
+@supports not (gap: 10px) {
+    .header-controls > * {
+        margin-right: 10px;
+        margin-bottom: 10px;
+    }
+    
+    .action-controls > * {
+        margin-right: 8px;
+    }
+}
+
+/* ===== RESPONSIVE IMAGES ET MEDIA ===== */
+img, video, canvas {
+    max-width: 100%;
+    height: auto;
+}
+
+canvas {
+    display: block;
+}
+
+/* ===== SCROLLBARS PERSONNALISÉES ===== */
+@media (min-width: 1025px) {
+    .table-container::-webkit-scrollbar {
+        height: 8px;
+    }
+    
+    .table-container::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+    }
+    
+    .table-container::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 4px;
+    }
+    
+    .table-container::-webkit-scrollbar-thumb:hover {
+        background: #a8a8a8;
+    }
+}
+
+/* ===== PERFORMANCE OPTIMIZATIONS ===== */
+.chart-item canvas {
+    will-change: transform;
+}
+
+.modal-content {
+    contain: layout style;
+}
+
+.financial-table {
+    contain: layout;
+}
+
+/* ===== RESPONSIVE UTILITIES ===== */
+.mobile-only {
+    display: block;
+}
+
+.tablet-only,
+.desktop-only {
+    display: none;
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+    .mobile-only,
+    .desktop-only {
+        display: none;
+    }
+    
+    .tablet-only {
+        display: block;
+    }
+}
+
+@media (min-width: 1025px) {
+    .mobile-only,
+    .tablet-only {
+        display: none;
+    }
+    
+    .desktop-only {
+        display: block;
+    }
+}

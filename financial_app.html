@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Application Financière SAS - Analyses Visuelles</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <header class="main-header">
+            <h1>💼 Application de Gestion Financière SAS</h1>
+            <div class="year-controls">
+                <select id="yearSelect"></select>
+                <button id="addYearBtn" class="btn btn-primary">+ Année</button>
+                <button id="deleteYearBtn" class="btn btn-danger">🗑️</button>
+                <button id="duplicateYearBtn" class="btn btn-warning">📋</button>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <!-- Section du tableau financier -->
+            <section class="financial-table-section">
+                <div class="table-container">
+                    <table class="financial-table">
+                        <thead>
+                            <tr>
+                                <th>Mois</th>
+                                <th>Chiffre d'affaires (€)</th>
+                                <th>Pertes (€)</th>
+                                <th>Achats professionnels (€)</th>
+                                <th>Bénéfice brut (€)</th>
+                                <th>Charges sociales (€)</th>
+                                <th>Bénéfice net (€)</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <!-- Les lignes du tableau seront générées par JavaScript -->
+                        </tbody>
+                        <tfoot>
+                            <tr class="totals-row">
+                                <td><strong>TOTAL</strong></td>
+                                <td id="totalRevenue"><strong>0 €</strong></td>
+                                <td id="totalLosses"><strong>0 €</strong></td>
+                                <td id="totalPurchases"><strong>0 €</strong></td>
+                                <td id="totalGrossProfit"><strong>0 €</strong></td>
+                                <td id="totalTaxes"><strong>0 €</strong></td>
+                                <td id="totalNetProfit"><strong>0 €</strong></td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Section des graphiques d'analyse -->
+            <section class="charts-section">
+                <h2>📊 Analyses Visuelles</h2>
+                
+                <div class="charts-grid">
+                    <!-- Graphique principal du chiffre d'affaires -->
+                    <div class="chart-item">
+                        <h3>📈 Évolution du Chiffre d'Affaires</h3>
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+
+                    <!-- Graphique des bénéfices -->
+                    <div class="chart-item">
+                        <h3>💰 Comparaison Bénéfices</h3>
+                        <canvas id="profitChart"></canvas>
+                    </div>
+
+                    <!-- Nouveau graphique de répartition -->
+                    <div class="chart-item">
+                        <h3>🥧 Répartition des Revenus/Charges</h3>
+                        <canvas id="distributionChart"></canvas>
+                    </div>
+
+                    <!-- Nouveau graphique d'évolution mensuelle -->
+                    <div class="chart-item">
+                        <h3>📊 Évolution Mensuelle</h3>
+                        <canvas id="monthlyEvolutionChart"></canvas>
+                    </div>
+
+                    <!-- Graphique de tendance (optionnel) -->
+                    <div class="chart-item">
+                        <h3>📈 Tendances et Prévisions</h3>
+                        <canvas id="trendChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section des alertes -->
+            <section class="alerts-section">
+                <div id="alertsContainer">
+                    <!-- Les alertes seront générées par JavaScript -->
+                </div>
+            </section>
+
+            <!-- Section des boutons d'action -->
+            <section class="actions-section">
+                <div class="action-buttons">
+                    <button id="statsBtn" class="btn btn-info">📊 Statistiques</button>
+                    <button id="compareBtn" class="btn btn-warning">📈 Comparaison</button>
+                    <button id="forecastBtn" class="btn btn-success">🔮 Prévisions</button>
+                    <button id="budgetBtn" class="btn btn-primary">💰 Budget</button>
+                    <button id="exportBtn" class="btn btn-secondary">📄 Export Excel</button>
+                    <button id="importBtn" class="btn btn-info">📥 Import</button>
+                    <button id="backupBtn" class="btn btn-warning">💾 Backup</button>
+                    <button id="printBtn" class="btn btn-dark">🖨️ Imprimer</button>
+                    <button id="settingsBtn" class="btn btn-secondary">⚙️ Paramètres</button>
+                </div>
+            </section>
+        </main>
+
+        <!-- Panel des paramètres -->
+        <div id="settingsPanel" class="settings-panel hidden">
+            <div class="settings-content">
+                <h3>⚙️ Paramètres</h3>
+                <div class="settings-form">
+                    <div class="form-group">
+                        <label for="taxRate">Taux de charges sociales (%):</label>
+                        <input type="number" id="taxRate" min="0" max="100" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label for="themeColor">Couleur du thème:</label>
+                        <input type="color" id="themeColor">
+                    </div>
+                    <div class="form-group">
+                        <label for="alertThreshold">Seuil d'alerte (€):</label>
+                        <input type="number" id="alertThreshold" min="0" step="100">
+                    </div>
+                    <div class="form-group">
+                        <label for="autoBackup">Sauvegarde automatique:</label>
+                        <input type="checkbox" id="autoBackup">
+                    </div>
+                </div>
+                <div class="settings-buttons">
+                    <button id="saveSettings" class="btn btn-success">💾 Sauvegarder</button>
+                    <button id="closeSettings" class="btn btn-secondary">❌ Fermer</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input file caché pour l'import -->
+        <input type="file" id="importFile" accept=".json,.xlsx,.csv" style="display: none;">
+    </div>
+
+    <!-- Scripts -->
+    <script src="stats_module.js"></script>
+    <script src="comparison_module.js"></script>
+    <script src="forecast_module.js"></script>
+    <script src="budget_module.js"></script>
+    <script src="script_new_fixed.js"></script>
+</body>
+</html>
