@@ -734,9 +734,8 @@ const ReportsModule = {
                                     <h5>💰 Chiffre d'Affaires</h5>
                                     <span class="trend-icon">${reportData.summary.revenueTrend >= 0 ? '📈' : '📉'}</span>
                                 </div>
-                                <div class="card-value">${this.formatCurrency(reportData.summary.totalRevenue)}</div>
-                                <div class="card-change ${reportData.summary.revenueTrend >= 0 ? 'positive' : 'negative'}">
-                                    ${reportData.summary.revenueTrend >= 0 ? '+' : ''}${reportData.summary.revenueTrend.toFixed(1)}% vs année précédente
+                                <div class="card-value">${this.formatCurrency(reportData.summary.totalRevenue)}</div>                                <div class="card-change ${reportData.summary.revenueTrend >= 0 ? 'positive' : 'negative'}">
+                                    ${reportData.summary.revenueTrend >= 0 ? '+' : ''}${reportData.summary.revenueTrend.toFixed(1)}% vs an précédent
                                 </div>
                             </div>
                             
@@ -747,9 +746,8 @@ const ReportsModule = {
                                 </div>
                                 <div class="card-value ${reportData.summary.totalProfit >= 0 ? 'positive' : 'negative'}">
                                     ${this.formatCurrency(reportData.summary.totalProfit)}
-                                </div>
-                                <div class="card-change ${reportData.summary.profitTrend >= 0 ? 'positive' : 'negative'}">
-                                    ${reportData.summary.profitTrend >= 0 ? '+' : ''}${reportData.summary.profitTrend.toFixed(1)}% vs année précédente
+                                </div>                                <div class="card-change ${reportData.summary.profitTrend >= 0 ? 'positive' : 'negative'}">
+                                    ${reportData.summary.profitTrend >= 0 ? '+' : ''}${reportData.summary.profitTrend.toFixed(1)}% vs an précédent
                                 </div>
                             </div>
                             
@@ -769,9 +767,8 @@ const ReportsModule = {
                                     <h5>⚡ Efficacité</h5>
                                     <span class="trend-icon">📊</span>
                                 </div>
-                                <div class="card-value">${reportData.summary.efficiency}/10</div>
-                                <div class="card-change">
-                                    Score basé sur la rentabilité
+                                <div class="card-value">${reportData.summary.efficiency}/10</div>                                <div class="card-change">
+                                    Score de rentabilité
                                 </div>
                             </div>
                         </div>
@@ -943,10 +940,8 @@ const ReportsModule = {
                             </div>
                         </div>
                     </div>
-                </div>
-                  <div class="report-actions">
+                </div>                  <div class="report-actions">
                     <button class="btn btn-success" onclick="ReportsModule.exportToExcel()">📊 Exporter Excel</button>
-                    <button class="btn btn-info" onclick="ReportsModule.printReport()">🖨️ Imprimer</button>
                 </div>
             </div>
             
@@ -957,19 +952,47 @@ const ReportsModule = {
                 .tab-btn.active { border-bottom-color: #3b82f6; color: #3b82f6; font-weight: bold; }
                 .report-tab { display: none; padding: 20px 0; }
                 .report-tab.active { display: block; }
+                  .summary-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin: 20px 0; }
+                .summary-card { 
+                    background: white; 
+                    padding: 15px; 
+                    border-radius: 12px; 
+                    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                    overflow: hidden;
+                    min-height: 140px;
+                    display: flex;
+                    flex-direction: column;
+                }
+                .summary-card.revenue { border-top: 4px solid #10b981; }
+                .summary-card.profit { border-top: 4px solid #3b82f6; }
+                .summary-card.margin { border-top: 4px solid #f59e0b; }
+                .summary-card.efficiency { border-top: 4px solid #8b5cf6; }
                 
-                .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin: 20px 0; }
-                .summary-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-                .summary-card.revenue { border-left: 4px solid #10b981; }
-                .summary-card.profit { border-left: 4px solid #3b82f6; }
-                .summary-card.margin { border-left: 4px solid #f59e0b; }
-                .summary-card.efficiency { border-left: 4px solid #8b5cf6; }
-                
-                .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-                .card-header h5 { margin: 0; color: #374151; font-size: 14px; }
-                .trend-icon { font-size: 18px; }
-                .card-value { font-size: 2em; font-weight: bold; color: #1f2937; margin: 10px 0; }
-                .card-change { font-size: 12px; font-weight: 600; }
+                .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+                .card-header h5 { 
+                    margin: 0; 
+                    color: #374151; 
+                    font-size: 14px;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    max-width: 80%;
+                }
+                .trend-icon { font-size: 16px; }
+                .card-value { 
+                    font-size: 1.6em; 
+                    font-weight: bold; 
+                    color: #1f2937; 
+                    margin: 8px 0; 
+                    word-break: break-word;
+                }
+                .card-change { 
+                    font-size: 11px; 
+                    font-weight: 600;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
                 .card-change.positive { color: #10b981; }
                 .card-change.negative { color: #ef4444; }
                 
@@ -1704,11 +1727,7 @@ const ReportsModule = {
                 
             default:
                 return 'Non évalué';
-        }
-    },
-      printReport() {
-        window.print();
-    },
+        }    },
     
     formatCurrency(amount) {
         return new Intl.NumberFormat('fr-FR', {

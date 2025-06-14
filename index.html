@@ -1,14 +1,20 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=5.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <meta name="description" content="Application de gestion financière responsive pour SAS">
-    <meta name="theme-color" content="#3b82f6"><title>Gestion Financière SAS - Demo BETA</title>
+    <meta name="theme-color" content="#3b82f6">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="format-detection" content="telephone=no">
+    <title>Gestion Financière SAS - Version Améliorée</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="responsive.css">    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <link rel="stylesheet" href="responsive.css">      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js" defer></script>
+    <script src="mobile-optimizations.js" defer></script><link rel="manifest" href="manifest.json">
     <script>
         // Vérifier le chargement des librairies
         document.addEventListener('DOMContentLoaded', () => {
@@ -20,6 +26,24 @@
             }
             if (typeof Chart === 'undefined') {
                 console.warn('⚠️ Chart.js non chargé, les graphiques ne fonctionneront pas');
+            }
+            
+            // Détecter l'appareil
+            const userAgent = navigator.userAgent.toLowerCase();
+            const isMobile = /iphone|ipad|ipod|android|blackberry|windows phone/g.test(userAgent);
+            const isTablet = /(ipad|tablet|playbook|silk)|(android(?!.*mobile))/g.test(userAgent);
+            
+            if (isMobile) {
+                document.body.classList.add('is-mobile');
+                console.log('📱 Détection: Appareil mobile');
+            } else if (isTablet) {
+                document.body.classList.add('is-tablet');
+                console.log('📱 Détection: Tablette');
+            }
+            
+            // Applique les optimisations tactiles
+            if (isMobile || isTablet || 'ontouchstart' in window) {
+                document.body.classList.add('touch-device');
             }
         });
     </script>
@@ -586,7 +610,7 @@
 <body>
     <div class="container">
         <header class="app-header">
-            <h1>📊 Gestion Financière SAS - Demo BETA</h1>
+            <h1>📊 Gestion Financière SAS</h1>
             <div class="header-controls">
                 <div class="year-controls">
                     <select id="yearSelect" class="year-select"></select>
@@ -602,11 +626,9 @@
                     <button id="budgetBtn" class="btn btn-info" title="Gestion Budget">💰 Budget</button>
                     <button id="reportBtn" class="btn btn-warning" title="Rapports détaillés">📋 Rapports</button>
                 </div>                  <div class="export-controls">
-                    <button id="chartTypeBtn" class="btn btn-info" title="Changer type de graphique">📊 Type</button>
-                    <button id="exportChartBtn" class="btn btn-success" title="Exporter graphiques">📈 Export</button>
+                    <button id="chartTypeBtn" class="btn btn-info" title="Changer type de graphique">📊 Type</button>                    <button id="exportChartBtn" class="btn btn-success" title="Exporter graphiques">📈 Export</button>
                     <button id="importBtn" class="btn btn-warning" title="Importer des données">📥 Import</button>
                     <button id="exportBtn" class="btn btn-success" title="Exporter vers Excel">📤 Excel</button>
-                    <button id="printBtn" class="btn btn-secondary" title="Imprimer">🖨️ Print</button>
                     <button id="backupBtn" class="btn btn-info" title="Sauvegarde complète">💾 Backup</button>
                 </div>
                 <button id="settingsBtn" class="btn btn-primary">⚙️ Paramètres</button>
@@ -782,29 +804,45 @@
                             }
                         });
                     }
-                    
-                    // Connecter les boutons Stats et Compare
+                      // Connecter les boutons Stats et Compare
                     const statsBtn = document.getElementById('statsBtn');
                     const compareBtn = document.getElementById('compareBtn');
                     
                     if (statsBtn) {
-                        statsBtn.addEventListener('click', () => {
-                            if (typeof StatsModule !== 'undefined') {
-                                StatsModule.showStats(app.data, app.currentYear, app.config);
-                            } else {
-                                app.showNotification('Module de statistiques non chargé', 'error');
-                            }
-                        });
+                        // S'assurer qu'il n'y a pas de doublon d'événements
+                        statsBtn.removeEventListener('click', statsClickHandler);
+                        statsBtn.addEventListener('click', statsClickHandler);
                     }
                     
                     if (compareBtn) {
-                        compareBtn.addEventListener('click', () => {
-                            if (typeof ComparisonModule !== 'undefined') {
-                                ComparisonModule.showComparison(app.data, app.config);
-                            } else {
-                                app.showNotification('Module de comparaison non chargé', 'error');
-                            }
-                        });
+                        // S'assurer qu'il n'y a pas de doublon d'événements
+                        compareBtn.removeEventListener('click', compareClickHandler);
+                        compareBtn.addEventListener('click', compareClickHandler);
+                    }
+                    
+                    // Fonctions de gestion des événements définies pour pouvoir être retirées si besoin
+                    function statsClickHandler() {
+                        if (typeof StatsModule !== 'undefined') {
+                            // Fermer tous les modals avant d'ouvrir le module de stats
+                            document.querySelectorAll('.custom-modal').forEach(modal => {
+                                modal.remove();
+                            });
+                            StatsModule.showStats(app.data, app.currentYear, app.config);
+                        } else {
+                            app.showNotification('Module de statistiques non chargé', 'error');
+                        }
+                    }
+                    
+                    function compareClickHandler() {
+                        if (typeof ComparisonModule !== 'undefined') {
+                            // Fermer tous les modals avant d'ouvrir le module de comparaison
+                            document.querySelectorAll('.custom-modal').forEach(modal => {
+                                modal.remove();
+                            });
+                            ComparisonModule.showComparison(app.data, app.config);
+                        } else {
+                            app.showNotification('Module de comparaison non chargé', 'error');
+                        }
                     }
                     
                     // Ajouter les nouveaux gestionnaires d'événements
@@ -1054,5 +1092,20 @@
         });
     });
 </script>
+<script>
+        // Gestion de la touche Échap pour fermer les modals
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                // Fermer tous les modals
+                document.querySelectorAll('.custom-modal').forEach(modal => modal.remove());
+                
+                // Masquer le panneau des paramètres
+                const settingsPanel = document.getElementById('settingsPanel');
+                if (settingsPanel && !settingsPanel.classList.contains('hidden')) {
+                    settingsPanel.classList.add('hidden');
+                }
+            }
+        });
+    </script>
 </body>
 </html>

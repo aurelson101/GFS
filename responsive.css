@@ -3,17 +3,53 @@
 
 /* ===== VARIABLES RESPONSIVE ===== */
 :root {
-    --mobile-padding: 10px;
+    --mobile-padding: 12px;
     --tablet-padding: 20px;
     --desktop-padding: 30px;
-    --mobile-font-size: 12px;
-    --tablet-font-size: 14px;
+    --mobile-font-size: 14px;
+    --tablet-font-size: 15px;
     --desktop-font-size: 16px;
+    --mobile-touch-target: 44px; /* Taille minimale pour les éléments tactiles */
+    --border-radius-mobile: 8px;
+    --spacing-mobile: 16px;
 }
 
 /* ===== BREAKPOINTS ===== */
-/* Mobile First - Par défaut pour mobile (0-768px) */
-@media (max-width: 768px) {
+/* Petits mobiles (0-480px) */
+@media (max-width: 480px) {
+    .container {
+        padding: 8px;
+        margin: 0;
+        min-width: 300px;
+    }
+    
+    .app-header h1 {
+        font-size: 16px;
+    }
+    
+    .btn {
+        font-size: 13px;
+        padding: 8px 12px;
+        min-width: auto;
+        min-height: var(--mobile-touch-target);
+    }
+    
+    .financial-table {
+        min-width: 800px;
+        font-size: 10px;
+    }
+    
+    .settings-header h2 {
+        font-size: 16px;
+    }
+    
+    .chart-item {
+        height: 200px;
+    }
+}
+
+/* Mobile standard (481px-768px) */
+@media (min-width: 481px) and (max-width: 768px) {
     /* Layout principal */
     .container {
         padding: var(--mobile-padding);
@@ -280,13 +316,15 @@
     
     .action-controls {
         flex-wrap: wrap;
-        justify-content: center;
+        justify-content: flex-start;
         gap: 10px;
     }
     
     .btn {
         font-size: var(--tablet-font-size);
         padding: 10px 16px;
+        min-height: 42px;
+        touch-action: manipulation;
     }
     
     .financial-table {
@@ -296,6 +334,27 @@
     .financial-table input {
         width: 90px;
         font-size: 13px;
+        min-height: 38px;
+    }
+    
+    /* Amélioration de la disposition pour tablettes */
+    .stats-container,
+    .comparison-grid,
+    .forecast-grid,
+    .budget-grid,
+    .report-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 15px !important;
+    }
+    
+    .charts-container {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+    
+    .chart-item {
+        height: 300px;
     }
     
     .charts-container {
@@ -335,6 +394,41 @@
     .trend-indicators,
     .budget-categories {
         grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+
+/* ===== TABLETTE PAYSAGE (1025px - 1280px) ===== */
+@media (min-width: 1025px) and (max-width: 1280px) {
+    .container {
+        padding: calc(var(--tablet-padding) + 4px);
+        max-width: 100%;
+    }
+    
+    .btn {
+        font-size: var(--tablet-font-size);
+    }
+    
+    .financial-table {
+        font-size: 14px;
+    }
+    
+    .stats-container,
+    .comparison-grid,
+    .forecast-grid,
+    .budget-grid,
+    .report-grid {
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 20px !important;
+    }
+    
+    .charts-container {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 25px;
+    }
+    
+    .chart-item {
+        height: 350px;
     }
 }
 
@@ -425,54 +519,140 @@
 
 /* ===== OPTIMISATIONS TACTILES ===== */
 @media (pointer: coarse) {
-    .btn {
-        min-height: 44px;
-        padding: 12px 16px;
-        touch-action: manipulation;
-    }
-    
+    /* Optimisations pour les écrans tactiles */
+    input, 
+    select, 
+    button,
+    .btn,
+    .tab-btn,
     .action-btn {
-        min-height: 36px;
-        min-width: 36px;
-        padding: 8px;
-    }
-    
-    input[type="number"], 
-    input[type="text"], 
-    input[type="email"],
-    input[type="password"],
-    select,
-    textarea {
-        min-height: 44px;
-        font-size: 16px; /* Évite le zoom sur iOS */
-        padding: 12px;
         touch-action: manipulation;
     }
     
-    .close-modal,
-    .close-btn {
-        min-height: 44px;
-        min-width: 44px;
-        padding: 10px;
+    /* Augmenter la taille des zones tactiles */
+    .btn,
+    .action-btn,
+    button, 
+    input[type="button"],
+    input[type="submit"],
+    select {
+        min-height: var(--mobile-touch-target);
+        min-width: var(--mobile-touch-target);
     }
     
-    .tab-btn {
-        min-height: 44px;
-        padding: 12px 16px;
+    /* Espacement entre éléments interactifs */
+    .action-controls,
+    .export-controls,
+    .year-controls,
+    .tab-btn,
+    .settings-actions {
+        gap: 12px;
     }
 }
 
-/* ===== IMPRESSION ===== */
+/* ===== STYLES POUR APPAREILS TACTILES ===== */
+.touch-device button,
+.touch-device .btn,
+.touch-device .action-btn,
+.touch-device .tab-btn,
+.touch-device select,
+.touch-device input[type="button"],
+.touch-device input[type="submit"] {
+    cursor: pointer;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+    touch-action: manipulation;
+}
+
+.touch-device input[type="text"],
+.touch-device input[type="number"],
+.touch-device input[type="email"],
+.touch-device input[type="password"],
+.touch-device select {
+    font-size: 16px; /* Évite le zoom automatique sur iOS */
+}
+
+/* Amélioration de l'accessibilité des tableaux défilables */
+.table-container {
+    position: relative;
+}
+
+.scroll-indicator {
+    transition: opacity 0.3s ease;
+}
+
+.table-container:focus-within .scroll-indicator {
+    opacity: 0;
+}
+
+/* Visibilité du bouton retour en haut */
+.back-to-top-btn {
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+}
+
+.back-to-top-btn:hover,
+.back-to-top-btn:focus {
+    opacity: 1;
+}
+
+/* État active (pressed) pour les éléments tactiles */
+.touch-device .btn:active,
+.touch-device .action-btn:active,
+.touch-device .tab-btn:active {
+    transform: translateY(1px);
+    filter: brightness(0.95);
+}
+
+/* Styles pour l'installation PWA */
+.pwa-install-banner {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    padding: 10px 15px;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 1000;
+    border-top: 1px solid #e2e8f0;
+    animation: slide-up 0.3s ease;
+}
+
+.pwa-install-banner .btn-close {
+    background: transparent;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 5px;
+}
+
+@keyframes slide-up {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+}
+
+/* Amélioration du feedback visuel sur mobiles */
+@media (hover: none) {
+    .btn:active, 
+    .action-btn:active {
+        background-color: var(--primary-hover);
+    }
+    
+    td:active, 
+    th:active {
+        background-color: rgba(59, 130, 246, 0.05);
+    }
+}
+
+/* ===== STYLES D'IMPRESSION ===== */
 @media print {
-    .header-controls,
+    .no-print,
+    .action-controls,
+    .export-controls,
     .settings-panel,
-    .keyboard-shortcuts,
-    .custom-modal,
-    .alert,
-    .notification,
-    footer,
-    .action-btn,
-    .btn {
+    .btn:not(.print-only) {
         display: none !important;
     }
     
@@ -480,51 +660,21 @@
         width: 100% !important;
         padding: 0 !important;
         margin: 0 !important;
-        max-width: none !important;
-    }
-    
-    .app-header h1 {
-        font-size: 18px;
-        margin-bottom: 10px;
     }
     
     .financial-table {
-        font-size: 10px;
-        border-collapse: collapse;
-        width: 100%;
+        width: 100% !important;
+        font-size: 10pt !important;
+        border-collapse: collapse !important;
     }
     
     .financial-table th,
     .financial-table td {
         border: 1px solid #000 !important;
-        padding: 4px !important;
     }
     
-    .financial-table input {
-        border: none;
-        background: transparent;
-        font-weight: bold;
-    }
-    
-    .charts-container {
-        display: none;
-    }
-    
-    .table-container {
-        overflow: visible;
-        margin: 0;
-        padding: 0;
-    }
-    
-    /* Forcer les couleurs pour l'impression */
-    * {
-        color: #000 !important;
-        background: #fff !important;
-    }
-    
-    .totals-row {
-        font-weight: bold !important;
-        background: #f0f0f0 !important;
+    @page {
+        margin: 1cm;
     }
 }
 
@@ -703,5 +853,71 @@ canvas {
     
     .desktop-only {
         display: block;
+    }
+}
+
+/* Styles responsives améliorés pour le rapport et le résumé exécutif */
+
+/* Pour tous les écrans */
+.summary-card {
+    word-break: break-word;
+    overflow: hidden;
+}
+
+.card-header h5, .card-change {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.card-value {
+    font-size: 1.5rem !important;
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Petits mobiles (0-480px) */
+@media (max-width: 480px) {
+    .summary-grid {
+        grid-template-columns: 1fr !important;
+    }
+    
+    .summary-card {
+        padding: 12px !important;
+        min-height: auto !important;
+    }
+    
+    .card-header h5 {
+        font-size: 13px !important;
+    }
+    
+    .trend-icon {
+        font-size: 14px !important;
+    }
+    
+    .card-value {
+        font-size: 1.3rem !important;
+        margin: 5px 0 !important;
+    }
+    
+    .card-change {
+        font-size: 10px !important;
+    }
+}
+
+/* Tablettes (481px-768px) */
+@media (min-width: 481px) and (max-width: 768px) {
+    .summary-grid {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 12px !important;
+    }
+    
+    .summary-card {
+        padding: 12px !important;
+    }
+    
+    .card-value {
+        font-size: 1.4rem !important;
     }
 }

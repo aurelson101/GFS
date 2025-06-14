@@ -17,11 +17,24 @@ const StatsModule = {
             }
         });
     },
+    
+    /**
+     * Ferme tous les modals existants
+     */
+    closeAllModals: function() {
+        document.querySelectorAll('.custom-modal').forEach(modal => {
+            modal.remove();
+        });
+    },
+    
     /**
      * Afficher les statistiques complètes
      */
     showStats: function(data, currentYear, config) {
         console.log('📊 Ouverture du module Statistiques');
+        
+        // Fermer tous les modals existants d'abord
+        this.closeAllModals();
         
         if (!data[currentYear]) {
             this.showError('Aucune donnée disponible pour cette année');
@@ -33,7 +46,7 @@ const StatsModule = {
         
         // Créer le modal
         const modal = document.createElement('div');
-        modal.className = 'custom-modal';
+        modal.className = 'custom-modal stats-modal';
         modal.innerHTML = modalContent;
         
         // Styles pour le modal

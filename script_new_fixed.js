@@ -72,10 +72,14 @@ class FinancialApp {
     
     /**
      * Configuration des écouteurs d'événements
-     */
-    setupEventListeners() {
+     */    setupEventListeners() {
+        // Assurer que tous les modals sont fermés au démarrage
+        this.closeAllModals();
+        
         // Gestion des paramètres
         this.addEventListenerSafe('settingsBtn', 'click', () => {
+            // Fermer tous les modals existants avant d'ouvrir les paramètres
+            this.closeAllModals();
             document.getElementById('settingsPanel')?.classList.remove('hidden');
         });
         
@@ -157,13 +161,7 @@ class FinancialApp {
         });
         
         this.addEventListenerSafe('exportChartBtn', 'click', () => {
-            this.exportCharts();
-        });
-        
-        // Impression
-        this.addEventListenerSafe('printBtn', 'click', () => {
-            window.print();
-        });
+            this.exportCharts();        });
         
         // Fermer les paramètres en cliquant à l'extérieur
         this.addEventListenerSafe('settingsPanel', 'click', (e) => {
@@ -1984,6 +1982,17 @@ class FinancialApp {
         return modal;
     }
       /**
+     * Fonction pour fermer tous les modals existants
+     * Cette fonction est appelée avant d'ouvrir un nouveau modal
+     */
+    closeAllModals() {
+        document.querySelectorAll('.custom-modal').forEach(modal => {
+            modal.remove();
+        });
+        console.log('🧹 Nettoyage des modals existants');
+    }
+    
+    /**
      * Détection du type d'appareil
      */
     detectDevice() {
@@ -2650,17 +2659,17 @@ style.textContent = `
 
     .recommendation-card.warning {
         background: #fef3c7;
-        border-left: 4px solid #f59e0b;
+        border-left-color: #f59e0b;
     }
 
     .recommendation-card.danger {
         background: #fee2e2;
-        border-left: 4px solid #ef4444;
+        border-left-color: #ef4444;
     }
 
     .recommendation-card.info {
         background: #dbeafe;
-        border-left: 4px solid #3b82f6;
+        border-left-color: #3b82f6;
     }
 
     .rec-header {

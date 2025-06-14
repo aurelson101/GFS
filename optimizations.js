@@ -624,6 +624,36 @@ const optimizationStyles = `
         height: 400px;
         overflow-y: auto;
     }
+    
+    /* Optimisations mobile et tablette */
+    @media (max-width: 1024px) {
+        .table-container {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .back-to-top-btn {
+            display: block;
+        }
+        
+        /* Ajustements spécifiques pour les petits écrans */
+        input[type="number"],
+        input[type="text"],
+        select {
+            font-size: 16px;
+            padding: 10px 8px;
+        }
+        
+        /* Amélioration de la lisibilité des tableaux */
+        .financial-table {
+            font-size: 0.9rem;
+        }
+        
+        /* Optimisation des graphiques */
+        .chart-container {
+            height: 300px;
+        }
+    }
 `;
 
 // Ajouter les styles d'optimisation
@@ -635,3 +665,284 @@ if (!document.getElementById('optimization-styles')) {
 }
 
 console.log('🚀 Module d\'optimisations et corrections chargé');
+
+/**
+ * Optimisations mobile et tablette
+ * Fonctionnalités pour améliorer l'expérience sur appareils mobiles
+ */
+function initMobileOptimizations() {
+    // Détection d'appareil mobile/tablette
+    const isMobileOrTablet = window.matchMedia('(max-width: 1024px)').matches;
+    
+    // Configuration des écouteurs d'événements pour les appareils tactiles
+    if (isMobileOrTablet) {
+        console.log("Initialisation des optimisations pour appareils mobiles");
+        setupMobileOptimizations();
+    }
+
+    // Gérer les orientations d'écran
+    window.addEventListener('orientationchange', handleOrientationChange);
+    
+    // Installation du Service Worker pour fonctionnalités hors ligne
+    if ('serviceWorker' in navigator) {
+        registerServiceWorker();
+    }
+}
+
+/**
+ * Configure les optimisations spécifiques aux appareils mobiles
+ */
+function setupMobileOptimizations() {
+    // Amélioration des tableaux défilables
+    enhanceScrollableTables();
+    
+    // Optimisation des événements tactiles
+    enhanceTouchTargets();
+    
+    // Ajouter le bouton "Retour en haut"
+    addBackToTopButton();
+    
+    // Détecter les gestes tactiles pour la navigation
+    detectSwipeGestures();
+    
+    // Optimisation des formulaires pour mobile
+    optimizeFormsForMobile();
+}
+
+/**
+ * Améliore les tableaux pour les rendre plus facilement défilables sur mobile
+ */
+function enhanceScrollableTables() {
+    const tables = document.querySelectorAll('.table-container');
+    
+    tables.forEach(table => {
+        if (!table.classList.contains('enhanced')) {
+            // Indicateur de défilement
+            const scrollIndicator = document.createElement('div');
+            scrollIndicator.className = 'scroll-indicator';
+            scrollIndicator.innerHTML = '← Faites défiler →';
+            scrollIndicator.style.cssText = `
+                text-align: center;
+                padding: 5px;
+                font-size: 12px;
+                color: #666;
+                background-color: rgba(255,255,255,0.7);
+                border-radius: 4px;
+                margin: 5px 0;
+                position: sticky;
+                left: 50%;
+                transform: translateX(-50%);
+                z-index: 5;
+                pointer-events: none;
+            `;
+            
+            // Ajouter l'indicateur
+            if (!table.querySelector('.scroll-indicator')) {
+                table.insertBefore(scrollIndicator, table.firstChild);
+            }
+            
+            // Masquer l'indicateur après le premier défilement
+            table.addEventListener('scroll', function() {
+                const indicator = this.querySelector('.scroll-indicator');
+                if (indicator) {
+                    indicator.style.display = 'none';
+                }
+            }, { once: true });
+            
+            table.classList.add('enhanced');
+        }
+    });
+}
+
+/**
+ * Améliore les cibles tactiles pour faciliter l'interaction
+ */
+function enhanceTouchTargets() {
+    // Augmenter la zone de clic des petits boutons
+    const smallButtons = document.querySelectorAll('.btn-small, .action-btn');
+    smallButtons.forEach(button => {
+        if (!button.dataset.touchOptimized) {
+            button.addEventListener('touchstart', function(e) {
+                e.target.style.transform = 'scale(1.1)';
+            });
+            
+            button.addEventListener('touchend', function(e) {
+                e.target.style.transform = 'scale(1)';
+            });
+            
+            button.dataset.touchOptimized = 'true';
+        }
+    });
+}
+
+/**
+ * Ajoute un bouton "Retour en haut" sur les longs contenus
+ */
+function addBackToTopButton() {
+    // Si le bouton existe déjà, ne pas le recréer
+    if (document.querySelector('.back-to-top-btn')) return;
+    
+    const backToTopBtn = document.createElement('button');
+    backToTopBtn.innerHTML = '⬆';
+    backToTopBtn.className = 'back-to-top-btn';
+    backToTopBtn.setAttribute('aria-label', 'Retour en haut de page');
+    backToTopBtn.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background-color: rgba(59, 130, 246, 0.8);
+        color: white;
+        border: none;
+        cursor: pointer;
+        display: none;
+        z-index: 1000;
+        font-size: 20px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    `;
+    
+    document.body.appendChild(backToTopBtn);
+    
+    // Afficher le bouton quand on descend dans la page
+    window.addEventListener('scroll', function() {
+        if (window.pageYOffset > 300) {
+            backToTopBtn.style.display = 'block';
+        } else {
+            backToTopBtn.style.display = 'none';
+        }
+    });
+    
+    // Action du bouton
+    backToTopBtn.addEventListener('click', function() {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    });
+}
+
+/**
+ * Détecte les gestes de balayage pour faciliter la navigation
+ */
+function detectSwipeGestures() {
+    if (document.body.dataset.swipeEnabled) return;
+    
+    let touchstartX = 0;
+    let touchendX = 0;
+    
+    const gestureZone = document.body;
+    
+    gestureZone.addEventListener('touchstart', function(e) {
+        touchstartX = e.changedTouches[0].screenX;
+    }, {passive: true});
+    
+    gestureZone.addEventListener('touchend', function(e) {
+        touchendX = e.changedTouches[0].screenX;
+        handleSwipeGesture();
+    }, {passive: true});
+    
+    function handleSwipeGesture() {
+        const sensitivity = 100; // Sensibilité du balayage
+        
+        // Balayage vers la gauche
+        if (touchendX < touchstartX - sensitivity) {
+            // Si on est sur un tableau à onglets, passer à l'onglet suivant
+            const activeTabs = document.querySelectorAll('.tab-btn.active');
+            if (activeTabs.length > 0) {
+                const activeTab = activeTabs[0];
+                const nextTab = activeTab.nextElementSibling;
+                if (nextTab && nextTab.classList.contains('tab-btn')) {
+                    nextTab.click();
+                }
+            }
+        }
+        
+        // Balayage vers la droite
+        if (touchendX > touchstartX + sensitivity) {
+            // Si on est sur un tableau à onglets, passer à l'onglet précédent
+            const activeTabs = document.querySelectorAll('.tab-btn.active');
+            if (activeTabs.length > 0) {
+                const activeTab = activeTabs[0];
+                const prevTab = activeTab.previousElementSibling;
+                if (prevTab && prevTab.classList.contains('tab-btn')) {
+                    prevTab.click();
+                }
+            }
+        }
+    }
+    
+    document.body.dataset.swipeEnabled = 'true';
+}
+
+/**
+ * Optimise les formulaires pour une meilleure expérience sur mobile
+ */
+function optimizeFormsForMobile() {
+    // Ajuster la taille des inputs sur mobile
+    const inputs = document.querySelectorAll('input[type="number"], input[type="text"]');
+    inputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            if (window.matchMedia('(max-width: 768px)').matches) {
+                // Augmenter légèrement la taille sur focus pour faciliter la saisie
+                this.style.fontSize = '16px'; // Évite le zoom automatique sur iOS
+                this.style.padding = '10px 8px';
+            }
+        });
+        
+        input.addEventListener('blur', function() {
+            this.style.fontSize = '';
+            this.style.padding = '';
+        });
+    });
+    
+    // Ajuster les selects pour une meilleure utilisabilité
+    const selects = document.querySelectorAll('select');
+    selects.forEach(select => {
+        if (window.matchMedia('(max-width: 768px)').matches) {
+            select.style.fontSize = '16px'; // Évite le zoom automatique sur iOS
+            select.style.height = '44px'; // Taille minimale recommandée pour tactile
+        }
+    });
+}
+
+/**
+ * Gère les changements d'orientation de l'écran
+ */
+function handleOrientationChange() {
+    // Recalculer les hauteurs et largeurs des graphiques
+    setTimeout(() => {
+        const charts = document.querySelectorAll('.chart-container');
+        charts.forEach(chartContainer => {
+            const canvas = chartContainer.querySelector('canvas');
+            if (canvas && canvas.chart) {
+                canvas.chart.resize();
+            }
+        });
+        
+        // Réappliquer certaines optimisations mobiles
+        if (window.matchMedia('(max-width: 1024px)').matches) {
+            enhanceScrollableTables();
+            optimizeFormsForMobile();
+        }
+    }, 300); // Délai pour laisser le navigateur s'ajuster à la nouvelle orientation
+}
+
+/**
+ * Enregistre un Service Worker pour les fonctionnalités hors ligne
+ */
+function registerServiceWorker() {
+    if (!navigator.serviceWorker.controller) {
+        navigator.serviceWorker.register('./service-worker.js')
+            .then(registration => {
+                console.log('Service Worker enregistré avec succès:', registration.scope);
+            })
+            .catch(error => {
+                console.error('Échec de l\'enregistrement du Service Worker:', error);
+            });
+    }
+}
+
+// Initialiser les optimisations mobiles au chargement
+document.addEventListener('DOMContentLoaded', initMobileOptimizations);

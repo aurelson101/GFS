@@ -6,13 +6,14 @@
 const ComparisonModule = {
     allData: null,
     config: null,
-    comparisonChart: null,
-
-    /**
+    comparisonChart: null,    /**
      * Afficher le panneau de comparaison
      */
     showComparison: function(data, config) {
         console.log('🔍 Ouverture du module de comparaison');
+        
+        // Fermer tous les modals existants d'abord
+        this.closeAllModals();
         
         const availableYears = Object.keys(data).map(y => parseInt(y)).sort();
         
@@ -53,7 +54,7 @@ const ComparisonModule = {
                     ${content}
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-success export-comparison-btn">📊 Export Rapport</button>
+                    <button class="btn btn-success export-comparison-btn">📊 Export Excel</button>
                     <button class="btn btn-secondary close-modal">Fermer</button>
                 </div>
             </div>
@@ -317,6 +318,9 @@ const ComparisonModule = {
      */
     compareYears: function(stats1, stats2) {
         const calculateChange = (val1, val2) => {
+            if (val1 == null || val2 == null) {
+                return { percentage: 0, type: 'neutral' };
+            }
             if (val1 === 0) return val2 > 0 ? { percentage: 100, type: 'positive' } : { percentage: 0, type: 'neutral' };
             const change = ((val2 - val1) / Math.abs(val1)) * 100;
             return {
@@ -566,11 +570,9 @@ const ComparisonModule = {
         } catch (error) {
             console.error('❌ Erreur lors de l\'initialisation du graphique:', error);
         }
-    },
-
-    /**
+    },    /**
      * Exporter le rapport de comparaison
-     */
+     */    
     exportComparison: function() {
         const year1Select = document.getElementById('year1Select');
         const year2Select = document.getElementById('year2Select');
@@ -584,42 +586,246 @@ const ComparisonModule = {
         const stats2 = this.calculateYearStats(this.allData[year2] || []);
         const comparison = this.compareYears(stats1, stats2);
         
-        const reportData = {
-            title: `Rapport de Comparaison ${year1} vs ${year2}`,
-            date: new Date().toLocaleDateString('fr-FR'),
-            years: { year1, year2 },
-            summary: {
-                [year1]: {
-                    revenue: stats1.totalRevenue,
-                    profit: stats1.totalNetProfit,
-                    margin: stats1.profitMargin,
-                    expenses: stats1.totalExpenses
-                },
-                [year2]: {
-                    revenue: stats2.totalRevenue,
-                    profit: stats2.totalNetProfit,
-                    margin: stats2.profitMargin,
-                    expenses: stats2.totalExpenses
-                }
-            },
-            changes: comparison,
-            monthlyData: {
-                [year1]: stats1.monthlyStats,
-                [year2]: stats2.monthlyStats
-            }
+        // Formattage monétaire amélioré pour l'export
+        const formatMoney = (amount) => {
+            return new Intl.NumberFormat('fr-FR', { 
+                style: 'currency', 
+                currency: 'EUR',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(amount);
         };
         
-        // Export JSON
-        const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `comparaison_${year1}_vs_${year2}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
+        // Version numérique pure pour les calculs
+        const formatMoneyRaw = (amount) => {
+            return parseFloat(amount.toFixed(0));
+        };
         
-        if (typeof app !== 'undefined' && app.showNotification) {
-            app.showNotification('Rapport de comparaison exporté', 'success');
+        // Formattage pourcentage pour l'export
+        const formatPercent = (value) => {
+            return new Intl.NumberFormat('fr-FR', { 
+                style: 'percent', 
+                minimumFractionDigits: 1,
+                maximumFractionDigits: 1
+            }).format(value / 100);
+        };
+        
+        // Date de génération formatée
+        const today = new Date();
+        const dateStr = today.toLocaleDateString('fr-FR', {
+            day: '2-digit',
+            month: 'long',
+            year: 'numeric'
+        });
+        
+        try {
+            // Animation chargement pour l'utilisateur
+            if (typeof app !== 'undefined' && app.showNotification) {
+                app.showNotification('📊 Génération du rapport Excel en cours...', 'info', 3000);
+            }
+
+            // Vérifier si XLSX est disponible
+            if (typeof XLSX === 'undefined') {
+                throw new Error("Bibliothèque XLSX non chargée");
+            }
+            
+            // Créer un nouveau classeur Excel
+            const wb = XLSX.utils.book_new();
+            
+            // Propriétés du document
+            wb.Props = {
+                Title: `Rapport Comparatif ${year1} vs ${year2}`,
+                Subject: "Analyse financière comparative",
+                Author: "Gestion Financière SAS",
+                CreatedDate: new Date()
+            };
+            
+            // Informations de l'entreprise pour le rapport
+            const companyInfo = {
+                name: "Gestion Financière SAS",
+                period: `Rapport comparatif ${year1} vs ${year2}`,
+                date: dateStr
+            };
+            
+            // === FEUILLE 1: TABLEAU DE BORD EXÉCUTIF ===
+            const dashboardData = [
+                [`TABLEAU DE BORD EXÉCUTIF - COMPARAISON ${year1} VS ${year2}`],
+                [`Gestion Financière SAS | Rapport généré le ${dateStr}`],
+                [""],
+                ["APERÇU SYNTHÉTIQUE"],
+                [""],
+                ["Principaux indicateurs de performance financière comparés entre les deux exercices"],
+                [""],
+                ["INDICATEURS CLÉS DE PERFORMANCE", "", "", "", ""],
+                [""],
+                ["Indicateur", `Année ${year1}`, `Année ${year2}`, "Évolution absolue"],
+                ["Chiffre d'affaires", 
+                    formatMoneyRaw(stats1.totalRevenue), 
+                    formatMoneyRaw(stats2.totalRevenue), 
+                    formatMoneyRaw(stats2.totalRevenue - stats1.totalRevenue)
+                ],
+                ["Bénéfice net", 
+                    formatMoneyRaw(stats1.totalNetProfit), 
+                    formatMoneyRaw(stats2.totalNetProfit), 
+                    formatMoneyRaw(stats2.totalNetProfit - stats1.totalNetProfit)
+                ],
+                ["Marge bénéficiaire", 
+                    parseFloat(stats1.profitMargin.toFixed(1)), 
+                    parseFloat(stats2.profitMargin.toFixed(1)), 
+                    parseFloat((stats2.profitMargin - stats1.profitMargin).toFixed(1))
+                ],
+                ["Dépenses totales", 
+                    formatMoneyRaw(stats1.totalExpenses), 
+                    formatMoneyRaw(stats2.totalExpenses), 
+                    formatMoneyRaw(stats2.totalExpenses - stats1.totalExpenses)
+                ],
+                ["Ratio dépenses/revenus", 
+                    parseFloat((stats1.totalExpenses / stats1.totalRevenue * 100).toFixed(1)) + "%", 
+                    parseFloat((stats2.totalExpenses / stats2.totalRevenue * 100).toFixed(1)) + "%", 
+                    parseFloat(((stats2.totalExpenses / stats2.totalRevenue) - (stats1.totalExpenses / stats1.totalRevenue)) * 100).toFixed(2) + " pts"
+                ],
+                ["Taux de rentabilité", 
+                    parseFloat((stats1.totalNetProfit / stats1.totalRevenue * 100).toFixed(1)) + "%", 
+                    parseFloat((stats2.totalNetProfit / stats2.totalRevenue * 100).toFixed(1)) + "%", 
+                    parseFloat(((stats2.totalNetProfit / stats2.totalRevenue) - (stats1.totalNetProfit / stats1.totalRevenue)) * 100).toFixed(2) + " pts"
+                ],
+                [""],
+                ["SYNTHÈSE DES PERFORMANCES"],
+                [""],
+                [`Performance globale: ${this.getPerformanceRating(comparison)}`],
+                [""],
+                [`Chiffre d'affaires moyen mensuel ${year1}: ${formatMoney(stats1.totalRevenue/12)}`],
+                [`Chiffre d'affaires moyen mensuel ${year2}: ${formatMoney(stats2.totalRevenue/12)}`],
+                ["Variation du CA moyen mensuel: " + formatPercent((stats2.totalRevenue/12 - stats1.totalRevenue/12) / (stats1.totalRevenue/12))],
+                [""],
+                [`Mois le plus performant ${year1}: ${stats1.bestMonth.month} (${formatMoney(stats1.bestMonth.value)})`],
+                [`Mois le plus performant ${year2}: ${stats2.bestMonth.month} (${formatMoney(stats2.bestMonth.value)})`],
+                [`Différence de pic de revenus: ${stats2.bestMonth.month === stats1.bestMonth.month ? "Même mois de pic" : "Changement de saisonnalité"}`],
+                [""],
+                ["ANALYSE COMPARATIVE DES TRIMESTRES"],
+                [""],
+                ["Trimestre", `CA ${year1}`, `CA ${year2}`, "Évolution", "Évolution %"],
+            ];
+            
+            // Ajouter les données trimestrielles
+            const quarters = this.calculateQuarterlyData(stats1.monthlyStats, stats2.monthlyStats);
+            quarters.forEach((quarter, i) => {
+                dashboardData.push([
+                    `T${i+1}`,
+                    formatMoneyRaw(quarter.revenue1),
+                    formatMoneyRaw(quarter.revenue2),
+                    formatMoneyRaw(quarter.revenueDiff),
+                    parseFloat(quarter.revenuePercent.toFixed(1))
+                ]);
+            });
+            
+            // Calculer le trimestre à la plus forte croissance / baisse
+            const bestQuarter = [...quarters].sort((a, b) => b.revenuePercent - a.revenuePercent)[0];
+            const worstQuarter = [...quarters].sort((a, b) => a.revenuePercent - b.revenuePercent)[0];
+            
+            // Ajouter des métriques avancées
+            dashboardData.push(
+                [""],
+                ["Trimestre avec la plus forte croissance:", `T${quarters.indexOf(bestQuarter) + 1}`, `${bestQuarter.revenuePercent.toFixed(1)}%`, "", ""],
+                ["Trimestre avec la plus faible performance:", `T${quarters.indexOf(worstQuarter) + 1}`, `${worstQuarter.revenuePercent.toFixed(1)}%`, "", ""],
+                [""],
+                ["ÉVALUATION DE L'ÉVOLUTION ET DU MOMENTUM"],
+                [""],
+                ["Tendance générale:", this.getTrendEvaluation(comparison), "", "", ""],
+                ["Momentum actuel:", this.getMomentumEvaluation(stats1, stats2), "", "", ""],
+                ["Stabilité des revenus:", this.getStabilityEvaluation(stats2.monthlyStats), "", "", ""],
+                [""],
+                ["RECOMMANDATIONS PRIORITAIRES"],
+                [""],
+                ["1. " + this.getKeyRecommendation(comparison, 1)],
+                ["2. " + this.getKeyRecommendation(comparison, 2)],
+                ["3. " + this.getKeyRecommendation(comparison, 3)]
+            );
+            
+            const dashboardWS = XLSX.utils.aoa_to_sheet(dashboardData);
+            
+            // Styles de la feuille tableau de bord
+            dashboardWS['!cols'] = [
+                { width: 30 }, // Colonne A
+                { width: 20 }, // Colonne B
+                { width: 20 }, // Colonne C
+                { width: 20 }, // Colonne D
+                { width: 20 }, // Colonne E
+            ];
+            
+            // Mettre en forme le tableau de bord (si la fonction existe)
+            if (this.formatExcelWorksheet) {
+                this.formatExcelWorksheet(dashboardWS, dashboardData);
+            }
+            
+            // === AJOUT DE GRAPHIQUES ===
+            if (this.addExcelCharts) {
+                this.addExcelCharts(wb, dashboardWS, dashboardData);
+            }
+
+            // === FEUILLE 2: RECOMMANDATIONS DÉTAILLÉES ===
+            const recommendationsData = [
+                ["RECOMMANDATIONS STRATÉGIQUES"],
+                [""],
+                ["Priorité", "Recommandation", "Impact attendu"],
+                ["1", this.getKeyRecommendation(comparison, 1), "Amélioration des marges"],
+                ["2", this.getKeyRecommendation(comparison, 2), "Réduction des coûts"],
+                ["3", this.getKeyRecommendation(comparison, 3), "Augmentation des revenus"]
+            ];
+
+            const recommendationsWS = XLSX.utils.aoa_to_sheet(recommendationsData);
+            recommendationsWS['!cols'] = [
+                { width: 15 },
+                { width: 50 },
+                { width: 30 }
+            ];
+            XLSX.utils.book_append_sheet(wb, recommendationsWS, "Recommandations");
+
+            // === FEUILLE 3: INDICATEURS AVANCÉS ===
+            const advancedMetricsData = [
+                ["INDICATEURS AVANCÉS"],
+                [""],
+                ["Indicateur", "Valeur"],
+                ["ROI", `${((stats2.totalNetProfit - stats1.totalNetProfit) / stats1.totalExpenses * 100).toFixed(2)}%`],
+                ["CAGR (Taux de croissance annuel moyen)", `${this.calculateCAGR(stats1.totalRevenue, stats2.totalRevenue, 1).toFixed(2)}%`]
+            ];
+
+            const advancedMetricsWS = XLSX.utils.aoa_to_sheet(advancedMetricsData);
+            advancedMetricsWS['!cols'] = [
+                { width: 30 },
+                { width: 20 }
+            ];
+            XLSX.utils.book_append_sheet(wb, advancedMetricsWS, "Indicateurs avancés");
+
+            // === ENREGISTRER LE FICHIER ===
+            XLSX.utils.book_append_sheet(wb, dashboardWS, "Tableau de bord");
+            XLSX.writeFile(wb, `Rapport_Comparatif_${year1}_vs_${year2}.xlsx`);
+
+            if (typeof app !== 'undefined' && app.showNotification) {
+                app.showNotification('✅ Rapport Excel généré avec succès !', 'success', 3000);
+            }
+        } catch (error) {
+            console.error('Erreur lors de l\'export Excel:', error);
+            
+            // Solution de repli: exporter en CSV simple
+            let csvContent = `COMPARAISON ${year1} VS ${year2}\n\n`;
+            csvContent += `,"Année ${year1}","Année ${year2}","Évolution","Évolution %"\n`;
+            csvContent += `"Chiffre d'affaires","${stats1.totalRevenue}","${stats2.totalRevenue}","${stats2.totalRevenue - stats1.totalRevenue}","${comparison.revenue.percentText}"\n`;
+            csvContent += `"Bénéfice net","${stats1.totalNetProfit}","${stats2.totalNetProfit}","${stats2.totalNetProfit - stats1.totalNetProfit}","${comparison.profit.percentText}"\n`;
+            csvContent += `"Marge bénéficiaire","${stats1.profitMargin}%","${stats2.profitMargin}%","${(stats2.profitMargin - stats1.profitMargin).toFixed(1)}pts","${comparison.margin.percentText}"\n`;
+            csvContent += `"Dépenses totales","${stats1.totalExpenses}","${stats2.totalExpenses}","${stats2.totalExpenses - stats1.totalExpenses}","${comparison.expenses.percentText}"\n`;
+            
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Comparaison_${year1}_vs_${year2}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            if (typeof app !== 'undefined' && app.showNotification) {
+                app.showNotification('Rapport exporté en CSV (Excel non disponible)', 'warning');
+            }
         }
     },
 
@@ -984,6 +1190,203 @@ const ComparisonModule = {
         `;
 
         modal.appendChild(style);
+    },
+
+    /**
+     * Ferme tous les modals existants
+     */
+    closeAllModals: function() {
+        document.querySelectorAll('.custom-modal').forEach(modal => {
+            modal.remove();
+        });
+    },
+
+    /**
+     * Génère un texte d'analyse pour un indicateur donné
+     * @param {string} indicator - L'indicateur à analyser (revenue, profit, expenses, margin)
+     * @param {object} comparison - Les données de comparaison pour cet indicateur
+     * @return {string} - Le texte d'analyse
+     */
+    getAnalysisText: function(indicator, comparison) {
+        const percentValue = parseFloat(comparison.percentText);
+        const isPositive = comparison.percentText.includes('+');
+        
+        let analysis = '';
+        
+        switch(indicator) {
+            case 'revenue':
+                if (isPositive) {
+                    if (percentValue > 20) {
+                        analysis = `Excellente croissance du chiffre d'affaires (${comparison.percentText}). Cette forte hausse pourrait indiquer le succès d'une nouvelle stratégie commerciale ou l'acquisition de nouveaux clients significatifs.`;
+                    } else if (percentValue > 10) {
+                        analysis = `Bonne progression du chiffre d'affaires (${comparison.percentText}). Cette évolution est supérieure à la croissance moyenne du secteur.`;
+                    } else {
+                        analysis = `Légère amélioration du chiffre d'affaires (${comparison.percentText}). Cette évolution positive reste modérée.`;
+                    }
+                } else {
+                    if (percentValue < -20) {
+                        analysis = `Forte baisse du chiffre d'affaires (${comparison.percentText}). Cette diminution significative nécessite une analyse approfondie des causes et un plan d'action correctif immédiat.`;
+                    } else if (percentValue < -10) {
+                        analysis = `Baisse notable du chiffre d'affaires (${comparison.percentText}). Une révision de la stratégie commerciale est recommandée.`;
+                    } else {
+                        analysis = `Légère baisse du chiffre d'affaires (${comparison.percentText}). Une attention particulière devrait être portée à l'évolution des ventes.`;
+                    }
+                }
+                break;
+                
+            case 'profit':
+                if (isPositive) {
+                    if (percentValue > 20) {
+                        analysis = `Excellente augmentation du bénéfice net (${comparison.percentText}). Cette progression significative traduit une amélioration de l'efficacité opérationnelle et de la rentabilité globale.`;
+                    } else if (percentValue > 10) {
+                        analysis = `Bonne évolution du bénéfice net (${comparison.percentText}). Cette progression témoigne d'une meilleure maîtrise des coûts et d'une bonne santé financière.`;
+                    } else {
+                        analysis = `Légère amélioration du bénéfice net (${comparison.percentText}). La rentabilité progresse modérément.`;
+                    }
+                } else {
+                    if (percentValue < -20) {
+                        analysis = `Forte diminution du bénéfice net (${comparison.percentText}). Cette baisse importante peut indiquer des problèmes structurels de rentabilité qui nécessitent des mesures correctives importantes.`;
+                    } else if (percentValue < -10) {
+                        analysis = `Baisse préoccupante du bénéfice net (${comparison.percentText}). Une analyse des postes de dépenses et une révision de la politique tarifaire sont recommandées.`;
+                    } else {
+                        analysis = `Légère réduction du bénéfice net (${comparison.percentText}). Cette évolution mérite une attention particulière pour éviter une tendance baissière.`;
+                    }
+                }
+                break;
+                
+            case 'margin':
+                if (isPositive) {
+                    if (percentValue > 20) {
+                        analysis = `Forte amélioration de la marge (${comparison.percentText}). Cette progression indique une meilleure valorisation de l'offre et/ou une optimisation significative des coûts.`;
+                    } else if (percentValue > 10) {
+                        analysis = `Bonne progression de la marge (${comparison.percentText}). Cette amélioration montre une meilleure efficacité opérationnelle.`;
+                    } else {
+                        analysis = `Légère amélioration de la marge (${comparison.percentText}). L'entreprise parvient à augmenter progressivement sa rentabilité.`;
+                    }
+                } else {
+                    if (percentValue < -20) {
+                        analysis = `Érosion importante de la marge (${comparison.percentText}). Cette dégradation significative peut être le signe d'une pression concurrentielle accrue ou d'une augmentation des coûts non répercutée sur les prix.`;
+                    } else if (percentValue < -10) {
+                        analysis = `Baisse préoccupante de la marge (${comparison.percentText}). Une révision de la structure des coûts et de la politique tarifaire est recommandée.`;
+                    } else {
+                        analysis = `Légère réduction de la marge (${comparison.percentText}). Cette tendance doit être surveillée pour éviter une dégradation progressive de la rentabilité.`;
+                    }
+                }
+                break;
+                
+            case 'expenses':
+                if (!isPositive) {
+                    if (percentValue < -20) {
+                        analysis = `Forte réduction des dépenses (${comparison.percentText}). Cette baisse significative des charges reflète probablement des mesures d'optimisation importantes.`;
+                    } else if (percentValue < -10) {
+                        analysis = `Bonne maîtrise des dépenses (${comparison.percentText}). Cette réduction témoigne d'efforts d'optimisation des coûts.`;
+                    } else {
+                        analysis = `Légère réduction des dépenses (${comparison.percentText}). L'entreprise parvient à contrôler progressivement ses charges.`;
+                    }
+                } else {
+                    if (percentValue > 20) {
+                        analysis = `Augmentation importante des dépenses (${comparison.percentText}). Cette hausse significative nécessite une analyse détaillée des postes concernés pour identifier les leviers d'optimisation.`;
+                    } else if (percentValue > 10) {
+                        analysis = `Hausse notable des dépenses (${comparison.percentText}). Une vigilance accrue sur la structure des coûts est recommandée.`;
+                    } else {
+                        analysis = `Légère augmentation des dépenses (${comparison.percentText}). Cette évolution reste modérée mais mérite attention.`;
+                    }
+                }
+                break;
+                
+            default:
+                analysis = `Évolution de ${comparison.percentText} par rapport à la période précédente.`;
+        }
+        
+        return analysis;
+    },
+    
+    /**
+     * Détermine les mois avec les plus fortes baisses entre deux années
+     * @param {Object} stats1 - Statistiques de la première année
+     * @param {Object} stats2 - Statistiques de la seconde année
+     * @return {string} - Texte des mois problématiques
+     */
+    getWorstMonthsText: function(stats1, stats2) {
+        const months = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", 
+                        "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+        
+        // Trouver les mois où la performance s'est dégradée
+        const declines = [];
+        
+        for (let i = 0; i < 12; i++) {
+            const data1 = stats1.monthlyStats[i] || { revenue: 0, netProfit: 0 };
+            const data2 = stats2.monthlyStats[i] || { revenue: 0, netProfit: 0 };
+            
+            const revenueDiff = data2.revenue - data1.revenue;
+            const profitDiff = data2.netProfit - data1.netProfit;
+            
+            // Si le revenu ou le profit a diminué significativement
+            if (revenueDiff < 0 || profitDiff < 0) {
+                const revenuePercent = data1.revenue ? (revenueDiff / data1.revenue) * 100 : 0;
+                const profitPercent = data1.netProfit ? (profitDiff / data1.netProfit) * 100 : 0;
+                
+                // Si la baisse est significative (plus de 10%)
+                if (revenuePercent < -10 || profitPercent < -10) {
+                    declines.push({
+                        month: months[i],
+                        revenuePercent,
+                        profitPercent
+                    });
+                }
+            }
+        }
+        
+        // Trier par amplitude de baisse (cumulée revenu+profit)
+        declines.sort((a, b) => (a.revenuePercent + a.profitPercent) - (b.revenuePercent + b.profitPercent));
+        
+        if (declines.length === 0) {
+            return "Aucun mois ne présente de baisse significative.";
+        }
+        
+        // Limiter à 3 mois maximum
+        const worstMonths = declines.slice(0, 3);
+        
+        return worstMonths.map(m => 
+            `${m.month} (CA: ${m.revenuePercent.toFixed(1)}%, Bénéfice: ${m.profitPercent.toFixed(1)}%)`
+        ).join(', ');
+    },
+    
+    /**
+     * Génère des recommandations basées sur les données comparées
+     * @param {Object} comparison - Données de comparaison entre les années
+     * @return {string} - Recommandations textuelles
+     */
+    getRecommendations: function(comparison) {
+        const recommendations = [];
+        
+        // Recommandations basées sur le chiffre d'affaires
+        if (comparison.revenue.percent < -5) {
+            recommendations.push("Renforcer les actions commerciales et marketing pour stimuler les ventes");
+            recommendations.push("Analyser les segments clients en recul et élaborer un plan de reconquête");
+        } else if (comparison.revenue.percent > 10) {
+            recommendations.push("Capitaliser sur les facteurs de croissance identifiés et les renforcer");
+        }
+        
+        // Recommandations basées sur les marges
+        if (comparison.margin.percent < -5) {
+            recommendations.push("Revoir la politique tarifaire et analyser la structure des coûts");
+            if (comparison.expenses.percent > 5) {
+                recommendations.push("Mettre en place un plan de réduction des charges pour restaurer les marges");
+            }
+        } else if (comparison.margin.percent > 5) {
+            recommendations.push("Documenter les bonnes pratiques qui ont permis d'améliorer la rentabilité");
+        }
+        
+        // Recommandations basées sur la saisonnalité
+        recommendations.push("Analyser en détail les mois présentant les écarts les plus importants");
+        
+        // Si pas assez de recommandations
+        if (recommendations.length < 3) {
+            recommendations.push("Établir un tableau de bord mensuel pour suivre les indicateurs clés");
+        }
+        
+        return recommendations.join(". ") + ".";
     }
 };
 
