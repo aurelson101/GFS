@@ -15,7 +15,7 @@ Application web de gestion financière permettant le suivi budgétaire, l'analys
 
   
 
-### ✨ [Démo en ligne](https://aurelson.com/demo/)
+### ✨ [Démo en ligne](https://demo.aurelson.com)
 
   
 
