@@ -6,12 +6,17 @@
     --mobile-padding: 12px;
     --tablet-padding: 20px;
     --desktop-padding: 30px;
-    --mobile-font-size: 14px;
+    --mobile-font-size: 15px; /* Augmenté de 14px à 15px */
     --tablet-font-size: 15px;
     --desktop-font-size: 16px;
-    --mobile-touch-target: 44px; /* Taille minimale pour les éléments tactiles */
+    --mobile-touch-target: 44px;
     --border-radius-mobile: 8px;
     --spacing-mobile: 16px;
+    
+    /* Nouvelles variables pour la lisibilité */
+    --mobile-text-secondary: #475569; /* Plus sombre que la version desktop */
+    --mobile-text-muted: #64748b;
+    --mobile-line-height: 1.5;
 }
 
 /* ===== BREAKPOINTS ===== */
@@ -24,27 +29,47 @@
     }
     
     .app-header h1 {
-        font-size: 16px;
+        font-size: 18px; /* Augmenté de 16px */
+        font-weight: 700;
+        color: var(--primary-color);
+        line-height: 1.2;
     }
     
     .btn {
-        font-size: 13px;
-        padding: 8px 12px;
+        font-size: 14px; /* Augmenté de 13px */
+        padding: 10px 14px; /* Padding amélioré */
         min-width: auto;
         min-height: var(--mobile-touch-target);
+        font-weight: 600; /* Renforcement du texte */
     }
     
     .financial-table {
         min-width: 800px;
-        font-size: 10px;
+        font-size: 12px; /* Maintenu mais avec meilleur contraste */
+    }
+    
+    .financial-table th,
+    .financial-table td {
+        color: var(--text-primary); /* Assure un bon contraste */
+        line-height: var(--mobile-line-height);
     }
     
     .settings-header h2 {
-        font-size: 16px;
+        font-size: 18px; /* Augmenté de 16px */
+        font-weight: 600;
     }
     
     .chart-item {
         height: 200px;
+    }
+    
+    /* Amélioration des textes secondaires sur très petits écrans */
+    .text-secondary,
+    .help-text,
+    .card-meta {
+        color: var(--mobile-text-secondary);
+        font-size: 13px; /* Minimum lisible */
+        line-height: 1.4;
     }
 }
 
@@ -59,10 +84,12 @@
     
     /* En-tête responsive */
     .app-header h1 {
-        font-size: 18px;
+        font-size: 20px; /* Augmenté de 18px */
         text-align: center;
         margin-bottom: 15px;
         word-break: break-word;
+        font-weight: 700;
+        line-height: 1.2;
     }
     
     .header-controls {
@@ -81,16 +108,18 @@
     
     /* Boutons responsive */
     .btn {
-        font-size: var(--mobile-font-size);
-        padding: 10px 14px;
+        font-size: var(--mobile-font-size); /* 15px */
+        padding: 12px 16px; /* Padding amélioré */
         min-width: auto;
-        min-height: 44px; /* Touch-friendly */
+        min-height: 44px;
         white-space: nowrap;
+        font-weight: 600;
+        line-height: 1.2;
     }
     
     .btn-small {
-        padding: 6px 10px;
-        font-size: 11px;
+        padding: 8px 12px; /* Amélioré */
+        font-size: 13px; /* Plus lisible */
         min-height: 36px;
     }
     
@@ -104,28 +133,31 @@
     
     .financial-table {
         min-width: 900px;
-        font-size: 11px;
+        font-size: 13px; /* Augmenté de 11px */
     }
     
     .financial-table th,
     .financial-table td {
-        padding: 8px 6px;
+        padding: 10px 8px; /* Padding amélioré */
         white-space: nowrap;
+        color: var(--text-primary);
+        line-height: 1.3;
     }
     
     .financial-table input {
-        width: 70px;
-        font-size: 12px;
-        padding: 6px;
-        min-height: 32px;
+        width: 80px; /* Augmenté de 70px */
+        font-size: 13px; /* Augmenté de 12px */
+        padding: 8px; /* Padding amélioré */
+        min-height: 36px; /* Touch-friendly */
     }
     
     .action-btn {
-        padding: 4px 6px;
-        font-size: 10px;
+        padding: 6px 8px; /* Amélioré */
+        font-size: 12px; /* Augmenté de 10px */
         margin: 0 1px;
-        min-height: 28px;
-        min-width: 28px;
+        min-height: 32px; /* Touch-friendly */
+        min-width: 32px;
+        font-weight: 500;
     }
     
     /* Graphiques responsive */
@@ -188,7 +220,8 @@
     }
     
     .settings-header h2 {
-        font-size: 18px;
+        font-size: 20px; /* Augmenté de 18px */
+        font-weight: 600;
     }
     
     .setting-group {
@@ -196,10 +229,11 @@
     }
     
     .setting-group label {
-        font-size: 14px;
+        font-size: 15px; /* Augmenté de 14px */
         display: block;
         margin-bottom: 8px;
         font-weight: 500;
+        color: var(--text-primary); /* Contraste amélioré */
     }
     
     .setting-group input,
@@ -210,6 +244,7 @@
         border-radius: 6px;
         border: 1px solid #d1d5db;
         min-height: 44px;
+        color: var(--text-primary);
     }
     
     /* Notifications responsive */
@@ -218,7 +253,9 @@
         left: 10px !important;
         top: 10px !important;
         max-width: none !important;
-        font-size: 14px;
+        font-size: 15px; /* Augmenté de 14px */
+        line-height: 1.4;
+        padding: 12px 16px;
     }
     
     /* Raccourcis clavier responsive */
@@ -226,24 +263,27 @@
         bottom: 10px !important;
         right: 10px !important;
         left: 10px !important;
-        font-size: 11px;
-        padding: 8px;
+        font-size: 12px; /* Augmenté de 11px */
+        padding: 10px; /* Amélioré */
         text-align: center;
+        line-height: 1.4;
     }
     
     /* Alertes responsive */
     .alert {
-        font-size: 13px;
-        padding: 10px;
+        font-size: 14px; /* Augmenté de 13px */
+        padding: 12px 14px; /* Padding amélioré */
         margin: 8px 0;
         border-radius: 6px;
+        line-height: 1.4;
     }
     
     /* Footer responsive */
     footer {
         padding: 15px 10px !important;
-        font-size: 11px !important;
+        font-size: 12px !important; /* Augmenté de 11px */
         text-align: center;
+        line-height: 1.4;
     }
     
     /* Formulaires responsive */
@@ -286,15 +326,55 @@
     .forecast-tabs,
     .budget-tabs {
         flex-wrap: wrap;
-        gap: 5px;
+        gap: 8px; /* Augmenté de 5px */
     }
     
     .tab-btn {
-        padding: 8px 10px !important;
-        font-size: 12px !important;
+        padding: 10px 12px !important; /* Amélioré */
+        font-size: 13px !important; /* Augmenté de 12px */
         flex: 1;
-        min-width: 80px;
+        min-width: 90px; /* Augmenté de 80px */
         text-align: center;
+        font-weight: 500;
+        line-height: 1.2;
+        color: var(--text-secondary);
+    }
+    
+    .tab-btn.active {
+        font-weight: 600;
+        color: var(--primary-color);
+    }
+    
+    /* Amélioration des cartes sur mobile */
+    .summary-card,
+    .stats-card,
+    .comparison-card {
+        padding: 14px !important; /* Amélioré */
+        margin-bottom: 12px;
+    }
+    
+    .card-value,
+    .stats-value,
+    .comparison-value,
+    .forecast-value {
+        font-size: 1.3rem !important; /* Plus lisible */
+        font-weight: 600;
+        line-height: 1.2;
+    }
+    
+    .card-content h3,
+    .card-header h5 {
+        font-size: 14px; /* Plus lisible */
+        font-weight: 500;
+        color: var(--text-secondary);
+        line-height: 1.3;
+    }
+    
+    .card-meta,
+    .card-change {
+        font-size: 12px;
+        color: var(--mobile-text-muted);
+        line-height: 1.3;
     }
 }
 
@@ -538,15 +618,20 @@
     select {
         min-height: var(--mobile-touch-target);
         min-width: var(--mobile-touch-target);
+        font-size: 15px; /* Plus lisible */
     }
     
-    /* Espacement entre éléments interactifs */
-    .action-controls,
-    .export-controls,
-    .year-controls,
-    .tab-btn,
-    .settings-actions {
-        gap: 12px;
+    /* Amélioration des contrastes pour le tactile */
+    .btn,
+    .tab-btn {
+        font-weight: 600;
+        border: 1px solid transparent;
+    }
+    
+    .btn:active,
+    .tab-btn:active {
+        transform: scale(0.98);
+        filter: brightness(0.95);
     }
 }
 
@@ -638,11 +723,26 @@
     .btn:active, 
     .action-btn:active {
         background-color: var(--primary-hover);
+        transform: scale(0.98);
+    }
+    
+    .tab-btn:active {
+        background-color: rgba(37, 99, 235, 0.1);
+        transform: scale(0.98);
     }
     
     td:active, 
     th:active {
         background-color: rgba(59, 130, 246, 0.05);
+    }
+    
+    /* Amélioration des inputs sur mobile */
+    input:focus,
+    select:focus,
+    textarea:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+        outline: none;
     }
 }
 
@@ -691,27 +791,37 @@
 @media (prefers-color-scheme: dark) {
     :root {
         --bg-color: #1a1a1a;
-        --text-color: #e4e4e7;
+        --text-color: #f1f5f9; /* Plus clair */
         --card-bg: #2d2d2d;
         --border-color: #4b5563;
+        --mobile-text-secondary: #cbd5e1; /* Plus clair en mode sombre */
+        --mobile-text-muted: #94a3b8;
     }
 }
 
 /* ===== ÉCRANS HAUTE RÉSOLUTION ===== */
 @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
     .financial-table {
-        font-weight: 400;
+        font-weight: 500; /* Plus visible sur haute résolution */
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
     }
     
     .btn {
-        font-weight: 500;
+        font-weight: 600; /* Plus visible */
         -webkit-font-smoothing: antialiased;
     }
     
     .app-header h1 {
-        font-weight: 600;
+        font-weight: 700; /* Plus visible */
+        -webkit-font-smoothing: antialiased;
+    }
+    
+    /* Amélioration des textes fins sur haute résolution */
+    .text-secondary,
+    .help-text,
+    .card-meta {
+        font-weight: 500;
         -webkit-font-smoothing: antialiased;
     }
 }
@@ -843,6 +953,21 @@ canvas {
     .tablet-only {
         display: block;
     }
+    
+    /* Amélioration des textes sur tablette */
+    .btn {
+        font-size: 15px;
+        padding: 10px 16px;
+    }
+    
+    .financial-table {
+        font-size: 14px;
+    }
+    
+    .tab-btn {
+        font-size: 14px !important;
+        padding: 10px 14px !important;
+    }
 }
 
 @media (min-width: 1025px) {
@@ -856,68 +981,35 @@ canvas {
     }
 }
 
-/* Styles responsives améliorés pour le rapport et le résumé exécutif */
-
-/* Pour tous les écrans */
-.summary-card {
-    word-break: break-word;
-    overflow: hidden;
-}
-
-.card-header h5, .card-change {
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    overflow: hidden;
-}
-
-.card-value {
-    font-size: 1.5rem !important;
-    line-height: 1.2;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-/* Petits mobiles (0-480px) */
-@media (max-width: 480px) {
-    .summary-grid {
-        grid-template-columns: 1fr !important;
+/* Amélioration spécifique des contrastes pour l'accessibilité */
+@media (prefers-contrast: high) {
+    :root {
+        --text-secondary: #374151; /* Plus sombre pour fort contraste */
+        --text-muted: #4b5563;
+        --mobile-text-secondary: #374151;
+        --mobile-text-muted: #4b5563;
     }
     
-    .summary-card {
-        padding: 12px !important;
-        min-height: auto !important;
+    .btn {
+        border: 2px solid currentColor;
+        font-weight: 700;
     }
     
-    .card-header h5 {
-        font-size: 13px !important;
-    }
-    
-    .trend-icon {
-        font-size: 14px !important;
-    }
-    
-    .card-value {
-        font-size: 1.3rem !important;
-        margin: 5px 0 !important;
-    }
-    
-    .card-change {
-        font-size: 10px !important;
+    .alert {
+        border-width: 2px;
+        font-weight: 500;
     }
 }
 
-/* Tablettes (481px-768px) */
-@media (min-width: 481px) and (max-width: 768px) {
-    .summary-grid {
-        grid-template-columns: 1fr 1fr !important;
-        gap: 12px !important;
+/* Support des grandes tailles de police système */
+@media (prefers-reduced-motion: no-preference) {
+    html {
+        font-size: 16px; /* Base pour les préférences utilisateur */
     }
     
-    .summary-card {
-        padding: 12px !important;
-    }
-    
-    .card-value {
-        font-size: 1.4rem !important;
+    @media (max-width: 768px) {
+        html {
+            font-size: 17px; /* Légèrement plus grand sur mobile */
+        }
     }
 }
